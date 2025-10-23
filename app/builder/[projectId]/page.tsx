@@ -285,8 +285,9 @@ export default function BuilderPage() {
         <AnimatePresence>
           {isBuilding && (
             <BuildProgress
-              progress={buildProgress}
+              isVisible={isBuilding}
               currentStep={currentBuildStep}
+              progress={buildProgress}
               onComplete={handleBuildComplete}
             />
           )}
