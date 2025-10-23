@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Database, Table, Code, Plug, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,9 +18,9 @@ export function BackendPanel({ project }: BackendPanelProps) {
 
   useEffect(() => {
     loadBackendData();
-  }, [project]);
+  }, [project, loadBackendData]);
 
-  const loadBackendData = async () => {
+  const loadBackendData = useCallback(async () => {
     const supabase = createClient();
     setLoading(true);
 
@@ -53,7 +53,7 @@ export function BackendPanel({ project }: BackendPanelProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [project]);
 
   return (
     <div className="h-full flex flex-col bg-white">

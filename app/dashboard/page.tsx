@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+// Dashboard page for JCAL.ai platform
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +26,7 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -41,11 +42,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadDashboardData();
-  }, [user]);
+  }, [loadDashboardData]);
 
   if (authLoading || loading) {
     return (

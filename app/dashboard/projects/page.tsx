@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -262,10 +263,11 @@ export default function ProjectsPage() {
               <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 relative">
                   {project.thumbnail_url ? (
-                    <img
+                    <Image
                       src={project.thumbnail_url}
                       alt={project.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
