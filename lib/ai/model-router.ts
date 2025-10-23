@@ -78,10 +78,10 @@ export class AIModelRouter {
       },
     });
 
-    // Gemini 1.5 Flash (lightweight high-speed generation - default for manual selection)
+    // Gemini 2.5 Flash (lightweight high-speed generation - default for manual selection)
     this.models.set('gemini', {
       provider: 'gemini',
-      model: 'gemini-1.5-flash', // Standard model name without -latest suffix
+      model: 'gemini-2.5-flash', // Stable version (June 2025)
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
@@ -93,10 +93,10 @@ export class AIModelRouter {
       },
     });
 
-    // Gemini 1.5 Pro (more capable than Flash, still widely available)
+    // Gemini 2.5 Pro (more capable than Flash)
     this.models.set('gemini-pro', {
       provider: 'gemini-pro',
-      model: 'gemini-1.5-pro', // Standard model name without -latest suffix
+      model: 'gemini-2.5-pro', // Stable version (June 2025)
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
