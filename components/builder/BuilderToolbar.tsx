@@ -11,9 +11,15 @@ import {
   Download,
   Settings,
   Share2,
-  MoreHorizontal
+  MoreHorizontal,
+  Rocket,
+  History,
+  Grid3x3,
+  Wand2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DeployButton } from './DeployButton';
+import { ExportButton } from './ExportButton';
 
 interface BuilderToolbarProps {
   projectId: string;
@@ -23,6 +29,8 @@ interface BuilderToolbarProps {
   onStartBuild?: () => void;
   onStopBuild?: () => void;
   isBuilding?: boolean;
+  onShowComponentLibrary?: () => void;
+  onShowVersionHistory?: () => void;
 }
 
 export function BuilderToolbar({ 
@@ -32,7 +40,9 @@ export function BuilderToolbar({
   onTogglePreview,
   onStartBuild,
   onStopBuild,
-  isBuilding = false
+  isBuilding = false,
+  onShowComponentLibrary,
+  onShowVersionHistory
 }: BuilderToolbarProps) {
   const [showMore, setShowMore] = useState(false);
 
@@ -81,10 +91,39 @@ export function BuilderToolbar({
 
       {/* Right Section */}
       <div className="flex items-center gap-3">
+        {/* Component Library */}
+        <Button
+          onClick={onShowComponentLibrary}
+          variant="outline"
+          size="sm"
+          className="border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          <Grid3x3 className="w-4 h-4 mr-2" />
+          Components
+        </Button>
+
+        {/* Version History */}
+        <Button
+          onClick={onShowVersionHistory}
+          variant="outline"
+          size="sm"
+          className="border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          <History className="w-4 h-4 mr-2" />
+          History
+        </Button>
+
+        {/* Export Code */}
+        <ExportButton projectId={projectId} projectName={projectName} />
+
+        {/* Deploy to Vercel */}
+        <DeployButton projectId={projectId} projectName={projectName} />
+
         {/* Preview Toggle */}
         <Button
           onClick={onTogglePreview}
           variant={showPreview ? "default" : "outline"}
+          size="sm"
           className={showPreview 
             ? "bg-indigo-600 hover:bg-indigo-700 text-white" 
             : "border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"

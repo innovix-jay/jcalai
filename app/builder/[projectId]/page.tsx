@@ -17,6 +17,8 @@ import { BuildProgressPanel } from '@/components/builder/BuildProgressPanel';
 import { ComponentInspector } from '@/components/builder/ComponentInspector';
 import { NaturalLanguageInput } from '@/components/builder/NaturalLanguageInput';
 import { DeployButton } from '@/components/builder/DeployButton';
+import { ComponentLibrary } from '@/components/builder/ComponentLibrary';
+import { VersionHistory } from '@/components/builder/VersionHistory';
 import { aiOnboardingService } from '@/services/ai-onboarding-service';
 import type { AIProvider } from '@/lib/ai/model-router';
 import type { ProjectPlan } from '@/types/onboarding';
@@ -45,6 +47,10 @@ export default function BuilderPage() {
   // Split-screen layout state
   const [showPreview, setShowPreview] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  // Feature state
+  const [showComponentLibrary, setShowComponentLibrary] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   // Load project data
   const loadProject = useCallback(async () => {
@@ -228,6 +234,8 @@ export default function BuilderPage() {
         onStartBuild={handleStartBuild}
         onStopBuild={handleStopBuild}
         isBuilding={isBuilding}
+        onShowComponentLibrary={() => setShowComponentLibrary(true)}
+        onShowVersionHistory={() => setShowVersionHistory(true)}
       />
 
       {/* Main Content Area */}
@@ -305,10 +313,25 @@ export default function BuilderPage() {
         {/* Natural Language Input */}
         <NaturalLanguageInput projectId={projectId} />
 
-        {/* Deploy Button (in toolbar alternative position) */}
-        <div className="fixed top-20 right-6 z-40">
-          <DeployButton projectId={projectId} projectName={project.name} />
-        </div>
+        {/* Component Library Modal */}
+        <AnimatePresence>
+          {showComponentLibrary && (
+            <ComponentLibrary 
+              projectId={projectId}
+              onClose={() => setShowComponentLibrary(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Version History Modal */}
+        <AnimatePresence>
+          {showVersionHistory && (
+            <VersionHistory 
+              projectId={projectId}
+              onClose={() => setShowVersionHistory(false)}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
