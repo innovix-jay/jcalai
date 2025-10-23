@@ -3,7 +3,7 @@
  * Automatically selects the best model based on prompt complexity and task type
  */
 
-export type AIProvider = 'claude' | 'openai' | 'gemini' | 'auto';
+export type AIProvider = 'claude' | 'openai' | 'gemini' | 'gemini-pro' | 'auto';
 export type TaskType = 'scaffold' | 'component' | 'page' | 'api' | 'database' | 'code' | 'general';
 
 export interface ModelCapabilities {
@@ -48,10 +48,10 @@ export class AIModelRouter {
   }
 
   private initializeModels() {
-    // Claude Sonnet 4 configuration (latest available as of Oct 2024)
+    // Claude 4.5 Sonnet (latest as of Oct 2025 - default on Claude.ai)
     this.models.set('claude', {
       provider: 'claude',
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-4.5-sonnet',
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       capabilities: {
         contextWindow: 200000,
@@ -63,14 +63,14 @@ export class AIModelRouter {
       },
     });
 
-    // OpenAI GPT-4o (latest available - GPT-5 not released yet)
+    // OpenAI GPT-5 (flagship reasoning and multimodal model, Oct 2025)
     this.models.set('openai', {
       provider: 'openai',
-      model: 'gpt-4o',
+      model: 'gpt-5',
       apiKey: process.env.OPENAI_API_KEY || '',
       capabilities: {
-        contextWindow: 128000,
-        costPerToken: 0.005 / 1000, // $5 per million tokens
+        contextWindow: 200000,
+        costPerToken: 0.01 / 1000, // $10 per million tokens
         strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses', 'reasoning'],
         weaknessAreas: ['very_long_context'],
         speed: 'fast',
@@ -78,18 +78,33 @@ export class AIModelRouter {
       },
     });
 
-    // Gemini 2.0 Flash (experimental, latest)
+    // Gemini 1.5 Flash (lightweight high-speed generation - default for manual selection)
     this.models.set('gemini', {
       provider: 'gemini',
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-1.5-flash',
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
         costPerToken: 0.00075 / 1000, // $0.75 per million tokens (most cost-effective)
         strengthAreas: ['massive_context', 'cost_effective', 'multimodal', 'speed'],
-        weaknessAreas: ['complex_reasoning'],
+        weaknessAreas: [],
         speed: 'fast',
-        quality: 'medium',
+        quality: 'high',
+      },
+    });
+
+    // Gemini 2.5 Pro (reasoning, code, STEM - Oct 2025, available for auto-select)
+    this.models.set('gemini-pro', {
+      provider: 'gemini-pro',
+      model: 'gemini-2.5-pro',
+      apiKey: process.env.GOOGLE_API_KEY || '',
+      capabilities: {
+        contextWindow: 1000000,
+        costPerToken: 0.00125 / 1000, // $1.25 per million tokens
+        strengthAreas: ['reasoning', 'code_generation', 'STEM', 'document_analysis', 'massive_context'],
+        weaknessAreas: [],
+        speed: 'medium',
+        quality: 'high',
       },
     });
   }
@@ -156,20 +171,20 @@ export class AIModelRouter {
       // Creative UI components - OpenAI for better design creativity
       selectedProvider = 'openai';
     } else if (analysis.estimatedTokens > 50000) {
-      // Very large context - use Gemini for cost-effectiveness
-      selectedProvider = 'gemini';
+      // Very large context - use Gemini 2.5 Pro for reasoning + context
+      selectedProvider = 'gemini-pro';
     } else if (analysis.complexity === 'high' && analysis.requiresCodeGeneration) {
-      // Complex code generation - Claude excels here
-      selectedProvider = 'claude';
+      // Complex code generation - use Gemini 2.5 Pro for reasoning
+      selectedProvider = 'gemini-pro';
     } else if (analysis.complexity === 'low' || taskType === 'general') {
-      // Simple tasks - use Gemini for cost-effectiveness
+      // Simple tasks - use Gemini Flash for speed and cost
       selectedProvider = 'gemini';
     } else if (taskType === 'api' || taskType === 'code') {
       // Backend logic and API - Claude for robust code
       selectedProvider = 'claude';
     } else {
-      // Default to OpenAI for balanced performance
-      selectedProvider = 'openai';
+      // Default to Gemini Flash for balanced performance and cost
+      selectedProvider = 'gemini';
     }
 
     const config = this.models.get(selectedProvider)!;
@@ -287,6 +302,7 @@ export class AIModelRouter {
       case 'openai':
         return this.generateWithOpenAI(config, prompt);
       case 'gemini':
+      case 'gemini-pro':
         return this.generateWithGemini(config, prompt);
       default:
         throw new Error(`Unsupported provider: ${provider}`);

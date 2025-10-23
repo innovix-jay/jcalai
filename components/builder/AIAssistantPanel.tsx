@@ -186,7 +186,7 @@ export function AIAssistantPanel({
               className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <Cpu className="w-3.5 h-3.5" />
-              {currentModel === 'auto' ? 'Auto' : currentModel === 'claude' ? 'Claude 4.5' : currentModel === 'openai' ? 'GPT-5' : 'Gemini 2.0'}
+              {currentModel === 'auto' ? 'Auto' : currentModel === 'claude' ? 'Claude 4.5' : currentModel === 'openai' ? 'GPT-5' : currentModel === 'gemini-pro' ? 'Gemini 2.5 Pro' : 'Gemini Flash'}
             </button>
             
             {showModelSelector && (
@@ -195,7 +195,7 @@ export function AIAssistantPanel({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50"
               >
-                {(['auto', 'claude', 'openai', 'gemini'] as AIProvider[]).map((model) => (
+                {(['auto', 'claude', 'openai', 'gemini-pro', 'gemini'] as AIProvider[]).map((model) => (
                   <button
                     key={model}
                     onClick={() => {
@@ -211,7 +211,8 @@ export function AIAssistantPanel({
                     {model === 'auto' && '🤖 Auto Select'}
                     {model === 'claude' && '🧠 Claude 4.5 Sonnet'}
                     {model === 'openai' && '💬 GPT-5'}
-                    {model === 'gemini' && '⚡ Gemini 2.0 Flash'}
+                    {model === 'gemini-pro' && '💎 Gemini 2.5 Pro'}
+                    {model === 'gemini' && '⚡ Gemini 1.5 Flash'}
                   </button>
                 ))}
               </motion.div>

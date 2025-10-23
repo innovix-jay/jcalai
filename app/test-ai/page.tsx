@@ -48,10 +48,11 @@ export default function TestAIPage() {
               className="w-full border rounded px-3 py-2"
               disabled={loading}
             >
-              <option value="auto">Auto Select</option>
-              <option value="gemini">Gemini (Recommended - Free tier)</option>
-              <option value="claude">Claude Sonnet</option>
-              <option value="openai">GPT-4o</option>
+              <option value="auto">🤖 Auto Select</option>
+              <option value="gemini">⚡ Gemini 1.5 Flash (Recommended - Fast & Free)</option>
+              <option value="gemini-pro">💎 Gemini 2.5 Pro (Reasoning & Code)</option>
+              <option value="claude">🧠 Claude 4.5 Sonnet</option>
+              <option value="openai">💬 GPT-5</option>
             </select>
           </div>
 
