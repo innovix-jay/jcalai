@@ -7,9 +7,6 @@ export function BuilderWorkspace() {
 
   return (
     <div
-      ref={(ref) => { 
-        if (ref) connectors.create(ref);
-      }}
       className="h-full bg-white"
       onDrop={(e) => {
         e.preventDefault();
