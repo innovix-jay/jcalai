@@ -37,7 +37,7 @@ export default function DashboardPage() {
       setStats({
         total: projects.length,
         deployed: projects.filter(p => p.status === 'published').length,
-        templatesUsed: projects.filter(p => p.ai_metadata?.template_id).length
+        templatesUsed: projects.filter(p => p.ai_metadata && p.ai_metadata.template_id).length
       });
     }
   }, [projects]);
