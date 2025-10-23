@@ -363,7 +363,7 @@ Generate a detailed project plan in JSON format:
 Make the plan comprehensive with 4-8 pages.`;
 
     try {
-      const response = await modelRouter.generate(planPrompt, 'scaffold', this.selectedModel);
+      const response = await generateAI(planPrompt, 'scaffold', this.selectedModel);
       const jsonMatch = response.response.match(/\{[\s\S]*\}/);
       
       if (jsonMatch) {
