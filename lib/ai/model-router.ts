@@ -48,18 +48,18 @@ export class AIModelRouter {
   }
 
   private initializeModels() {
-    // Claude 3 Haiku (available with this API key)
+    // Claude Sonnet 4.5 (latest and most capable, Oct 2025)
     this.models.set('claude', {
       provider: 'claude',
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-sonnet-4-5-20250929',
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       capabilities: {
         contextWindow: 200000,
-        costPerToken: 0.00025 / 1000, // $0.25 per million tokens (most affordable)
-        strengthAreas: ['speed', 'efficiency', 'simple_tasks'],
-        weaknessAreas: ['complex_reasoning'],
-        speed: 'fast',
-        quality: 'medium',
+        costPerToken: 0.003 / 1000, // $3 per million tokens
+        strengthAreas: ['code_generation', 'complex_reasoning', 'long_context', 'architecture'],
+        weaknessAreas: [],
+        speed: 'medium',
+        quality: 'high',
       },
     });
 
