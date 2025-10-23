@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/hooks/use-auth';
 import { useProjectSync } from '@/lib/hooks/use-project-sync';
 import { JCALLogo } from '@/components/ui/jcal-logo';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
   Plus, 
   Code, 

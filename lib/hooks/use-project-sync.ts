@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Project {
@@ -47,9 +47,9 @@ export function useProjectSync(userId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, fetchProjects, supabase]);
 
-  async function fetchProjects() {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -73,7 +73,7 @@ export function useProjectSync(userId: string) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [userId, supabase]);
 
   return { 
     projects, 
@@ -88,6 +88,44 @@ export function useBuildProgress(projectId: string) {
   const [buildSession, setBuildSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+
+  const fetchBuildSession = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('build_sessions')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('status', 'in-progress')
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!error && data) {
+        setBuildSession(data);
+        fetchBuildLogs();
+      }
+    } catch (err) {
+      console.error('Error fetching build session:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, supabase]);
+
+  const fetchBuildLogs = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('build_logs')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+
+      if (!error && data) {
+        setBuildLogs(data);
+      }
+    } catch (err) {
+      console.error('Error fetching build logs:', err);
+    }
+  }, [projectId, supabase]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -116,45 +154,8 @@ export function useBuildProgress(projectId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [projectId]);
+  }, [projectId, fetchBuildSession, fetchBuildLogs, supabase]);
 
-  async function fetchBuildSession() {
-    try {
-      const { data, error } = await supabase
-        .from('build_sessions')
-        .select('*')
-        .eq('project_id', projectId)
-        .eq('status', 'in-progress')
-        .order('started_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (!error && data) {
-        setBuildSession(data);
-        fetchBuildLogs();
-      }
-    } catch (err) {
-      console.error('Error fetching build session:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function fetchBuildLogs() {
-    try {
-      const { data, error } = await supabase
-        .from('build_logs')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: true });
-
-      if (!error && data) {
-        setBuildLogs(data);
-      }
-    } catch (err) {
-      console.error('Error fetching build logs:', err);
-    }
-  }
 
   return {
     buildLogs,
