@@ -57,7 +57,9 @@ Start by warmly greeting them and asking about their vision for this project. Ke
 
     try {
       // Generate initial greeting using AI
+      console.log('[AI Onboarding] Generating greeting with model:', this.selectedModel);
       const greetingResponse = await modelRouter.generate(systemPrompt, 'general', this.selectedModel);
+      console.log('[AI Onboarding] Greeting generated successfully');
 
       const context: ConversationContext = {
         projectId,
@@ -89,8 +91,9 @@ Start by warmly greeting them and asking about their vision for this project. Ke
       await this.saveContext(context);
 
       return context;
-    } catch (error) {
-      console.error('AI initiation error:', error);
+    } catch (error: any) {
+      console.error('[AI Onboarding] INITIATION ERROR:', error);
+      console.error('[AI Onboarding] Error details:', error.message, error.stack);
       // Fallback to friendly default if AI fails
       const context: ConversationContext = {
         projectId,

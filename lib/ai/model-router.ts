@@ -48,10 +48,10 @@ export class AIModelRouter {
   }
 
   private initializeModels() {
-    // Claude 4.5 Sonnet configuration
+    // Claude Sonnet 4 configuration (latest available as of Oct 2024)
     this.models.set('claude', {
       provider: 'claude',
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-3-5-sonnet-20241022',
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       capabilities: {
         contextWindow: 200000,
@@ -63,14 +63,14 @@ export class AIModelRouter {
       },
     });
 
-    // OpenAI GPT-5 configuration
+    // OpenAI GPT-4o (latest available - GPT-5 not released yet)
     this.models.set('openai', {
       provider: 'openai',
-      model: 'gpt-5',
+      model: 'gpt-4o',
       apiKey: process.env.OPENAI_API_KEY || '',
       capabilities: {
-        contextWindow: 200000,
-        costPerToken: 0.01 / 1000, // $10 per million tokens
+        contextWindow: 128000,
+        costPerToken: 0.005 / 1000, // $5 per million tokens
         strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses', 'reasoning'],
         weaknessAreas: ['very_long_context'],
         speed: 'fast',
@@ -78,7 +78,7 @@ export class AIModelRouter {
       },
     });
 
-    // Gemini 2.5 Flash configuration (default, fast)
+    // Gemini 2.0 Flash (experimental, latest)
     this.models.set('gemini', {
       provider: 'gemini',
       model: 'gemini-2.0-flash-exp',
@@ -246,20 +246,34 @@ export class AIModelRouter {
     const selection = this.selectModel(prompt, taskType, userPreference);
     const config = this.models.get(selection.provider)!;
 
+    console.log('[Model Router] Selected provider:', selection.provider, 'Model:', selection.model);
+    console.log('[Model Router] Reasoning:', selection.reasoning);
+
     if (!config.apiKey) {
+      console.error('[Model Router] API key missing for:', selection.provider);
       throw new Error(`API key not configured for ${selection.provider}`);
     }
 
-    // Generate using the selected provider
-    const result = await this.generateWithProvider(selection.provider, config, prompt);
+    console.log('[Model Router] API key present for', selection.provider, '- length:', config.apiKey.length);
 
-    return {
-      response: result.response,
-      provider: selection.provider,
-      model: selection.model,
-      tokensUsed: result.tokensUsed,
-      cost: result.tokensUsed * config.capabilities.costPerToken,
-    };
+    try {
+      // Generate using the selected provider
+      const result = await this.generateWithProvider(selection.provider, config, prompt);
+
+      console.log('[Model Router] Generation successful! Tokens used:', result.tokensUsed);
+
+      return {
+        response: result.response,
+        provider: selection.provider,
+        model: selection.model,
+        tokensUsed: result.tokensUsed,
+        cost: result.tokensUsed * config.capabilities.costPerToken,
+      };
+    } catch (error: any) {
+      console.error('[Model Router] Generation error:', error);
+      console.error('[Model Router] Error message:', error.message);
+      throw error;
+    }
   }
 
   private async generateWithProvider(
@@ -340,6 +354,8 @@ export class AIModelRouter {
     config: AIModelConfig,
     prompt: string
   ): Promise<{ response: string; tokensUsed: number }> {
+    console.log('[Gemini] Calling API with model:', config.model);
+    
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`,
       {
@@ -354,10 +370,14 @@ export class AIModelRouter {
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('[Gemini] API error response:', errorText);
+      throw new Error(`Gemini API error (${response.status}): ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('[Gemini] API response received');
+    
     const text = data.candidates[0].content.parts[0].text;
     
     // Gemini doesn't return token counts in the same way, estimate
