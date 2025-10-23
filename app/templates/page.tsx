@@ -152,8 +152,15 @@ export default function TemplatesPage() {
             description: template.description,
             user_id: user.id,
             status: 'draft',
-            framework: 'nextjs',
-            template_id: template.id,
+            app_type: 'web',
+            ai_metadata: { template_id: template.id },
+            config: {
+              framework: 'nextjs',
+              styling: 'tailwindcss',
+              database: 'supabase',
+              auth: true,
+              api: true
+            }
           }
         ])
         .select()
@@ -167,10 +174,19 @@ export default function TemplatesPage() {
         .insert([
           {
             project_id: project.id,
+            name: 'Home',
             title: 'Home',
             slug: 'home',
+            path: '/',
+            is_home: true,
             order_index: 0,
-            content: JSON.stringify({ components: [] })
+            structure: {
+              ROOT: {
+                type: 'Container',
+                nodes: [],
+                props: {}
+              }
+            }
           }
         ]);
 

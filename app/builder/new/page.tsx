@@ -42,8 +42,15 @@ export default function CreateAppPage() {
             description: prompt,
             user_id: user.id,
             status: 'draft',
-            framework: 'nextjs',
+            app_type: 'web',
             ai_prompt: prompt,
+            config: {
+              framework: 'nextjs',
+              styling: 'tailwindcss',
+              database: 'supabase',
+              auth: true,
+              api: true
+            }
           }
         ])
         .select()
@@ -57,12 +64,19 @@ export default function CreateAppPage() {
         .insert([
           {
             project_id: project.id,
+            name: 'Home',
             title: 'Home',
             slug: 'home',
+            path: '/',
+            is_home: true,
             order_index: 0,
-            content: JSON.stringify({
-              components: []
-            })
+            structure: {
+              ROOT: {
+                type: 'Container',
+                nodes: [],
+                props: {}
+              }
+            }
           }
         ]);
 
