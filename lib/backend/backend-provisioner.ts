@@ -33,12 +33,20 @@ export class BackendProvisioner {
   private managementApiKey: string;
 
   constructor() {
-    // Initialize Supabase admin client for management operations
-    this.adminClient = createSupabaseAdmin(
-      process.env.JCAL_MASTER_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.JCAL_MASTER_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    this.managementApiKey = process.env.SUPABASE_MANAGEMENT_API_KEY || '';
+    // Initialize lazily to avoid build-time environment variable issues
+    this.getAdminClient() = null;
+    this.managementApiKey = '';
+  }
+
+  private getAdminClient() {
+    if (!this.adminClient) {
+      this.getAdminClient() = createSupabaseAdmin(
+        process.env.JCAL_MASTER_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.JCAL_MASTER_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      this.managementApiKey = process.env.SUPABASE_MANAGEMENT_API_KEY || '';
+    }
+    return this.adminClient;
   }
 
   /**
