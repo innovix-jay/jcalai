@@ -34,13 +34,13 @@ export class BackendProvisioner {
 
   constructor() {
     // Initialize lazily to avoid build-time environment variable issues
-    this.getAdminClient() = null;
+    this.adminClient = null;
     this.managementApiKey = '';
   }
 
   private getAdminClient() {
     if (!this.adminClient) {
-      this.getAdminClient() = createSupabaseAdmin(
+      this.adminClient = createSupabaseAdmin(
         process.env.JCAL_MASTER_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.JCAL_MASTER_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
