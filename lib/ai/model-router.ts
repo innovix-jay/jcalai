@@ -48,10 +48,10 @@ export class AIModelRouter {
   }
 
   private initializeModels() {
-    // Claude configuration
+    // Claude 4.5 Sonnet configuration
     this.models.set('claude', {
       provider: 'claude',
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250514',
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       capabilities: {
         contextWindow: 200000,
@@ -63,32 +63,32 @@ export class AIModelRouter {
       },
     });
 
-    // OpenAI configuration
+    // OpenAI GPT-5 configuration
     this.models.set('openai', {
       provider: 'openai',
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-5',
       apiKey: process.env.OPENAI_API_KEY || '',
       capabilities: {
-        contextWindow: 128000,
+        contextWindow: 200000,
         costPerToken: 0.01 / 1000, // $10 per million tokens
-        strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses'],
+        strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses', 'reasoning'],
         weaknessAreas: ['very_long_context'],
         speed: 'fast',
         quality: 'high',
       },
     });
 
-    // Gemini configuration
+    // Gemini 2.5 Flash configuration (default, fast)
     this.models.set('gemini', {
       provider: 'gemini',
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.0-flash-exp',
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
-        costPerToken: 0.00125 / 1000, // $1.25 per million tokens (very cost-effective)
-        strengthAreas: ['massive_context', 'cost_effective', 'multimodal', 'data_analysis'],
-        weaknessAreas: ['complex_code_generation'],
-        speed: 'medium',
+        costPerToken: 0.00075 / 1000, // $0.75 per million tokens (most cost-effective)
+        strengthAreas: ['massive_context', 'cost_effective', 'multimodal', 'speed'],
+        weaknessAreas: ['complex_reasoning'],
+        speed: 'fast',
         quality: 'medium',
       },
     });

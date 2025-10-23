@@ -186,7 +186,7 @@ export function AIAssistantPanel({
               className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <Cpu className="w-3.5 h-3.5" />
-              {currentModel === 'auto' ? 'Auto' : currentModel === 'claude' ? 'Claude' : currentModel === 'openai' ? 'GPT-4' : 'Gemini'}
+              {currentModel === 'auto' ? 'Auto' : currentModel === 'claude' ? 'Claude 4.5' : currentModel === 'openai' ? 'GPT-5' : 'Gemini 2.0'}
             </button>
             
             {showModelSelector && (
@@ -209,9 +209,9 @@ export function AIAssistantPanel({
                     }`}
                   >
                     {model === 'auto' && '🤖 Auto Select'}
-                    {model === 'claude' && '🧠 Claude Sonnet'}
-                    {model === 'openai' && '💬 GPT-4 Turbo'}
-                    {model === 'gemini' && '💎 Gemini Pro'}
+                    {model === 'claude' && '🧠 Claude 4.5 Sonnet'}
+                    {model === 'openai' && '💬 GPT-5'}
+                    {model === 'gemini' && '⚡ Gemini 2.0 Flash'}
                   </button>
                 ))}
               </motion.div>
