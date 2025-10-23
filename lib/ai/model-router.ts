@@ -48,29 +48,29 @@ export class AIModelRouter {
   }
 
   private initializeModels() {
-    // Claude 4.5 Sonnet (latest as of Oct 2025 - default on Claude.ai)
+    // Claude 3 Haiku (available with this API key)
     this.models.set('claude', {
       provider: 'claude',
-      model: 'claude-4.5-sonnet',
+      model: 'claude-3-haiku-20240307',
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       capabilities: {
         contextWindow: 200000,
-        costPerToken: 0.003 / 1000, // $3 per million tokens
-        strengthAreas: ['code_generation', 'complex_reasoning', 'long_context', 'architecture'],
-        weaknessAreas: ['image_generation'],
-        speed: 'medium',
-        quality: 'high',
+        costPerToken: 0.00025 / 1000, // $0.25 per million tokens (most affordable)
+        strengthAreas: ['speed', 'efficiency', 'simple_tasks'],
+        weaknessAreas: ['complex_reasoning'],
+        speed: 'fast',
+        quality: 'medium',
       },
     });
 
-    // OpenAI GPT-5 (flagship reasoning and multimodal model, Oct 2025)
+    // OpenAI GPT-4o (latest flagship model, available with this API key)
     this.models.set('openai', {
       provider: 'openai',
-      model: 'gpt-5',
+      model: 'gpt-4o',
       apiKey: process.env.OPENAI_API_KEY || '',
       capabilities: {
-        contextWindow: 200000,
-        costPerToken: 0.01 / 1000, // $10 per million tokens
+        contextWindow: 128000,
+        costPerToken: 0.0025 / 1000, // $2.50 per million input tokens
         strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses', 'reasoning'],
         weaknessAreas: ['very_long_context'],
         speed: 'fast',

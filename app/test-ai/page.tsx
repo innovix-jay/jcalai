@@ -49,10 +49,10 @@ export default function TestAIPage() {
               disabled={loading}
             >
               <option value="auto">🤖 Auto Select</option>
-              <option value="gemini">⚡ Gemini 1.5 Flash (Recommended - Fast & Free)</option>
-              <option value="gemini-pro">💎 Gemini 1.5 Pro (More Capable)</option>
-              <option value="claude">🧠 Claude 4.5 Sonnet</option>
-              <option value="openai">💬 GPT-5</option>
+              <option value="gemini">⚡ Gemini 2.5 Flash (Recommended - Fast & Affordable)</option>
+              <option value="gemini-pro">💎 Gemini 2.5 Pro (Most Capable)</option>
+              <option value="openai">💬 GPT-4o (OpenAI Latest)</option>
+              <option value="claude">🧠 Claude 3 Haiku (Fast & Cheap)</option>
             </select>
           </div>
 
