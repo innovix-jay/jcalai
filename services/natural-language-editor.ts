@@ -60,7 +60,11 @@ Respond with ONLY valid JSON.`
       }]
     });
 
-    const jsonText = response.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const firstBlock = response.content[0];
+    const jsonText = (firstBlock.type === 'text' ? firstBlock.text : '')
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
     return JSON.parse(jsonText);
   }
 
@@ -95,7 +99,13 @@ Make minimal, surgical changes. Only modify what's necessary. Preserve all exist
       }]
     });
 
-    const result = JSON.parse(response.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+    const firstBlock = response.content[0];
+    const result = JSON.parse(
+      (firstBlock.type === 'text' ? firstBlock.text : '')
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim()
+    );
     return result;
   }
 }
