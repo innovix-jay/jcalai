@@ -81,7 +81,7 @@ export class AIModelRouter {
     // Gemini 1.5 Flash (lightweight high-speed generation - default for manual selection)
     this.models.set('gemini', {
       provider: 'gemini',
-      model: 'gemini-1.5-flash-latest', // Use -latest suffix for current version
+      model: 'gemini-1.5-flash', // Standard model name without -latest suffix
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
@@ -96,7 +96,7 @@ export class AIModelRouter {
     // Gemini 1.5 Pro (more capable than Flash, still widely available)
     this.models.set('gemini-pro', {
       provider: 'gemini-pro',
-      model: 'gemini-1.5-pro-latest', // Use 1.5 Pro which is stable and available
+      model: 'gemini-1.5-pro', // Standard model name without -latest suffix
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
@@ -373,9 +373,9 @@ export class AIModelRouter {
     console.log('[Gemini] Calling API with model:', config.model);
     console.log('[Gemini] API Key length:', config.apiKey?.length || 0);
     
-    // Use v1 endpoint (v1beta is deprecated for some models)
+    // Use v1beta for Gemini models (v1 doesn't support these yet)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${config.model}:generateContent?key=${config.apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`,
       {
         method: 'POST',
         headers: {
