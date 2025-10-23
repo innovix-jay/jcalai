@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { JCALLogo } from '@/components/ui/jcal-logo';
+import { useAuth } from '@/lib/hooks/use-auth';
 import {
   Sparkles,
   Zap,
@@ -14,6 +19,33 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <JCALLogo size="lg" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render homepage if user is logged in (will redirect)
+  if (user) {
+    return null;
+  }
+
   const features = [
     {
       icon: Sparkles,

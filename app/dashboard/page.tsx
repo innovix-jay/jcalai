@@ -5,21 +5,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  ShoppingBag, 
-  Users, 
-  TrendingUp,
-  ArrowRight
+  Code, 
+  Rocket, 
+  Database,
+  ArrowRight,
+  Plus,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { getProductsCount } from '@/lib/actions/products';
-import { getSubscribersCount } from '@/lib/actions/subscribers';
 import Link from 'next/link';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState({
-    products: 0,
-    subscribers: 0,
+    projects: 0,
+    deployed: 0,
+    templates: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -31,14 +33,12 @@ export default function DashboardPage() {
     if (!user) return;
     
     try {
-      const [productsCount, subscribersCount] = await Promise.all([
-        getProductsCount(),
-        getSubscribersCount()
-      ]);
-      
+      // TODO: Load actual project data from Supabase
+      // For now, show placeholder data
       setStats({
-        products: productsCount,
-        subscribers: subscribersCount,
+        projects: 0,
+        deployed: 0,
+        templates: 0,
       });
     } catch (error) {
       console.error('Failed to load dashboard:', error);

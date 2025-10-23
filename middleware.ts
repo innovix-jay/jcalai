@@ -21,11 +21,6 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  // Refresh and read the auth session for gating decisions
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const { pathname } = req.nextUrl
 
   // Allow the OAuth callback to proceed without interference
@@ -33,8 +28,13 @@ export async function middleware(req: NextRequest) {
     return res
   }
 
+  // Refresh and read the auth session for gating decisions
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   const isAuthRoute = pathname.startsWith('/auth')
-  const isProtectedRoute = pathname.startsWith('/dashboard')
+  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/builder')
 
   // If visiting auth pages while logged in, send to dashboard
   if (isAuthRoute && user) {
@@ -42,13 +42,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Protect dashboard for unauthenticated users
+  // Protect dashboard and builder for unauthenticated users
   if (isProtectedRoute && !user) {
     const url = new URL('/auth/login', req.url)
     return NextResponse.redirect(url)
   }
 
-  // Optional UX: if user is logged in and visits home, send to dashboard
+  // UX: if user is logged in and visits home, send to dashboard
   if (pathname === '/' && user) {
     const url = new URL('/dashboard', req.url)
     return NextResponse.redirect(url)
