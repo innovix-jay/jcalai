@@ -269,6 +269,7 @@ export function AIAssistantPanel({
             placeholder="Type your message... (Enter to send)"
             disabled={isProcessing}
             className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 
+                     text-gray-900 dark:text-white
                      border border-gray-300 dark:border-gray-700 
                      rounded-xl resize-none max-h-32 
                      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent

@@ -33,12 +33,12 @@ export function MessageBubble({ message, isLatest = false }: MessageBubbleProps)
           className={`
             px-4 py-3 rounded-2xl shadow-md
             ${isAI 
-              ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-bl-none' 
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-bl-none' 
               : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-br-none'
             }
           `}
         >
-          <div className={`prose prose-sm max-w-none ${isAI ? 'prose-invert' : ''}`}>
+          <div className={`prose prose-sm max-w-none ${isAI ? 'prose-invert prose-white' : ''}`}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -49,12 +49,20 @@ export function MessageBubble({ message, isLatest = false }: MessageBubbleProps)
                 strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                 code: ({ inline, children, ...props }: any) =>
                   inline ? (
-                    <code className="px-1.5 py-0.5 rounded bg-black/10 font-mono text-sm">
+                    <code className={`px-1.5 py-0.5 rounded font-mono text-sm ${
+                      isAI 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                    }`}>
                       {children}
                     </code>
                   ) : (
                     <code
-                      className="block p-3 rounded-lg bg-black/20 font-mono text-sm overflow-x-auto my-2"
+                      className={`block p-3 rounded-lg font-mono text-sm overflow-x-auto my-2 ${
+                        isAI 
+                          ? 'bg-white/10 text-white border border-white/20' 
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
+                      }`}
                       {...props}
                     >
                       {children}
