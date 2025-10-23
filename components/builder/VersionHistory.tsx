@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   History, 
@@ -30,11 +30,7 @@ export function VersionHistory({ projectId, onClose }: { projectId: string; onCl
   const [loading, setLoading] = useState(true);
   const [restoringId, setRestoringId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchVersions();
-  }, [projectId]);
-
-  const fetchVersions = async () => {
+  const fetchVersions = useCallback(async () => {
     const supabase = createClient();
     setLoading(true);
 
@@ -52,7 +48,11 @@ export function VersionHistory({ projectId, onClose }: { projectId: string; onCl
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchVersions();
+  }, [fetchVersions]);
 
   const handleRestore = async (versionId: string) => {
     setRestoringId(versionId);

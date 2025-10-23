@@ -8,6 +8,7 @@ interface HotReloadUpdate {
   updates: Record<string, string>;
   buildTime: number;
   timestamp: number;
+  error?: string;
 }
 
 interface UseHotReloadReturn {

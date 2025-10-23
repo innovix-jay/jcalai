@@ -28,7 +28,7 @@ import { Sparkles } from 'lucide-react';
 export default function BuilderPage() {
   const params = useParams();
   const router = useRouter();
-  const projectId = params.projectId as string;
+  const projectId = params?.projectId as string;
   
   const [project, setProject] = useState<any>(null);
   const [pages, setPages] = useState<any[]>([]);
