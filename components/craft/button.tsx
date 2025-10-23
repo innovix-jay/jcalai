@@ -32,7 +32,9 @@ export const Button = ({
 
   return (
     <button
-      ref={(ref) => connect(drag(ref!))}
+      ref={(ref) => {
+        if (ref) connect(drag(ref));
+      }}
       className={`rounded-lg font-medium transition-colors ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       {text}

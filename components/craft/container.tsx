@@ -15,7 +15,9 @@ export const Container = ({ children, className = '', background = 'transparent'
 
   return (
     <div
-      ref={(ref) => connect(drag(ref!))}
+      ref={(ref) => {
+        if (ref) connect(drag(ref));
+      }}
       className={className}
       style={{
         background,

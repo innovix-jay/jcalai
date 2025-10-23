@@ -22,7 +22,9 @@ export const Hero = ({
 
   return (
     <div
-      ref={(ref) => connect(drag(ref!))}
+      ref={(ref) => {
+        if (ref) connect(drag(ref));
+      }}
       className={`relative py-20 px-4 ${className}`}
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',

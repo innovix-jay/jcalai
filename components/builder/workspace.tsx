@@ -7,7 +7,9 @@ export function BuilderWorkspace() {
 
   return (
     <div
-      ref={(ref) => connectors.create(ref as HTMLElement)}
+      ref={(ref) => { 
+        if (ref) connectors.create(ref);
+      }}
       className="h-full bg-white"
       onDrop={(e) => {
         e.preventDefault();

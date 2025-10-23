@@ -28,7 +28,9 @@ export const Text = ({
 
   return (
     <div
-      ref={(ref) => connect(drag(ref!))}
+      ref={(ref) => {
+        if (ref) connect(drag(ref));
+      }}
       onClick={() => setEditable(true)}
       onBlur={() => setEditable(false)}
     >
