@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Monitor, 
   Tablet, 
@@ -9,8 +9,10 @@ import {
   RefreshCw, 
   ExternalLink,
   AlertCircle,
-  Loader2
+  Loader2,
+  Zap
 } from 'lucide-react';
+import { useHotReload } from '@/lib/hooks/use-hot-reload';
 
 interface LivePreviewPaneProps {
   projectId: string;
@@ -24,7 +26,21 @@ export function LivePreviewPane({ projectId, url }: LivePreviewPaneProps) {
   const [error, setError] = useState<string | null>(null);
   const [viewportSize, setViewportSize] = useState<ViewportSize>('desktop');
   const [previewUrl, setPreviewUrl] = useState<string | null>(url || null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [showUpdateIndicator, setShowUpdateIndicator] = useState(false);
+  
+  const { iframeRef, isConnected, lastUpdate, buildTime } = useHotReload(
+    projectId,
+    (update) => {
+      if (update.buildTime) {
+        // Show update indicator
+        setShowUpdateIndicator(true);
+        setTimeout(() => setShowUpdateIndicator(false), 3000);
+      }
+      if (update.error) {
+        setError(update.error);
+      }
+    }
+  );
 
   useEffect(() => {
     // Listen for build completion events
@@ -75,6 +91,34 @@ export function LivePreviewPane({ projectId, url }: LivePreviewPaneProps) {
             <div className="w-3 h-3 rounded-full bg-green-500" />
           </div>
           <span className="text-sm text-gray-600 dark:text-gray-400">Live Preview</span>
+          
+          {/* Hot Reload Status */}
+          {isConnected && (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                Hot Reload Active
+              </span>
+            </div>
+          )}
+          
+          {/* Update Indicator */}
+          <AnimatePresence>
+            {showUpdateIndicator && buildTime !== null && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-green-50 to-emerald-50 
+                           dark:from-green-900/20 dark:to-emerald-900/20
+                           text-green-700 dark:text-green-400 rounded-full text-xs font-medium
+                           border border-green-200 dark:border-green-800"
+              >
+                <Zap className="w-3 h-3" />
+                Updated in {buildTime}ms
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="flex items-center gap-2">
