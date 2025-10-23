@@ -21,6 +21,32 @@ export function useProjectSync(userId: string) {
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
+  const fetchProjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching projects:', error);
+        setError(error.message);
+        return;
+      }
+
+      setProjects(data || []);
+    } catch (err: any) {
+      console.error('Error in fetchProjects:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, supabase]);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -49,32 +75,6 @@ export function useProjectSync(userId: string) {
       supabase.removeChannel(channel);
     };
   }, [userId, fetchProjects, supabase]);
-
-  const fetchProjects = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching projects:', error);
-        setError(error.message);
-        return;
-      }
-
-      setProjects(data || []);
-    } catch (err: any) {
-      console.error('Error in fetchProjects:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, supabase]);
 
   return { 
     projects, 
