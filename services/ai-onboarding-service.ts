@@ -2,7 +2,8 @@
 // Uses real LLM APIs (Claude, OpenAI, Gemini) for intelligent conversation
 
 import { createClient } from '@/lib/supabase/client';
-import { modelRouter, type AIProvider } from '@/lib/ai/model-router';
+import { generateAI } from '@/lib/ai/client-ai';
+import type { AIProvider } from '@/lib/ai/model-router';
 import type {
   ConversationContext,
   ConversationStage,
@@ -58,7 +59,7 @@ Start by warmly greeting them and asking about their vision for this project. Ke
     try {
       // Generate initial greeting using AI
       console.log('[AI Onboarding] Generating greeting with model:', this.selectedModel);
-      const greetingResponse = await modelRouter.generate(systemPrompt, 'general', this.selectedModel);
+      const greetingResponse = await generateAI(systemPrompt, 'general', this.selectedModel);
       console.log('[AI Onboarding] Greeting generated successfully');
 
       const context: ConversationContext = {
@@ -152,7 +153,7 @@ Start by warmly greeting them and asking about their vision for this project. Ke
 
     try {
       // Get AI response
-      const aiResponse = await modelRouter.generate(
+      const aiResponse = await generateAI(
         systemPrompt,
         this.getTaskType(context.stage),
         this.selectedModel

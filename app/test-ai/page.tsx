@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { modelRouter } from '@/lib/ai/model-router';
+import { generateAI } from '@/lib/ai/client-ai';
 import type { AIProvider } from '@/lib/ai/model-router';
 
 export default function TestAIPage() {
@@ -17,7 +17,7 @@ export default function TestAIPage() {
 
     try {
       console.log('Testing AI with model:', selectedModel);
-      const response = await modelRouter.generate(
+      const response = await generateAI(
         'Say hello and introduce yourself in one sentence.',
         'general',
         selectedModel
