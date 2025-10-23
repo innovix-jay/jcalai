@@ -14,6 +14,9 @@ import { BuilderToolbar } from '@/components/builder/BuilderToolbar';
 import { BuilderCanvas } from '@/components/builder/BuilderCanvas';
 import { LivePreviewPane } from '@/components/builder/LivePreviewPane';
 import { BuildProgressPanel } from '@/components/builder/BuildProgressPanel';
+import { ComponentInspector } from '@/components/builder/ComponentInspector';
+import { NaturalLanguageInput } from '@/components/builder/NaturalLanguageInput';
+import { DeployButton } from '@/components/builder/DeployButton';
 import { aiOnboardingService } from '@/services/ai-onboarding-service';
 import type { AIProvider } from '@/lib/ai/model-router';
 import type { ProjectPlan } from '@/types/onboarding';
@@ -295,6 +298,17 @@ export default function BuilderPage() {
 
         {/* Build Progress Panel */}
         <BuildProgressPanel projectId={projectId} />
+
+        {/* Component Inspector */}
+        <ComponentInspector projectId={projectId} />
+
+        {/* Natural Language Input */}
+        <NaturalLanguageInput projectId={projectId} />
+
+        {/* Deploy Button (in toolbar alternative position) */}
+        <div className="fixed top-20 right-6 z-40">
+          <DeployButton projectId={projectId} projectName={project.name} />
+        </div>
       </div>
     </div>
   );
