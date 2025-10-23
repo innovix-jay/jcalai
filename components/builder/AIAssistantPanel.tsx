@@ -6,15 +6,18 @@ import { X, Send, Loader2 } from 'lucide-react';
 import { MessageBubble } from './messages/MessageBubble';
 import { TypingIndicator } from './messages/TypingIndicator';
 import { SuggestedActions } from './messages/SuggestedActions';
-import { projectOnboardingService } from '@/services/project-onboarding';
+import { aiOnboardingService } from '@/services/ai-onboarding-service';
+import type { AIProvider } from '@/lib/ai/model-router';
 import type { ConversationContext, ConversationMessage } from '@/types/onboarding';
 import toast from 'react-hot-toast';
+import { Cpu } from 'lucide-react';
 
 interface AIAssistantPanelProps {
   projectId: string;
   projectName: string;
   initialPrompt: string;
   isNew?: boolean;
+  selectedModel?: AIProvider;
   onClose?: () => void;
   onPlanReady?: (plan: any) => void;
   onBuildStart?: () => void;
@@ -25,6 +28,7 @@ export function AIAssistantPanel({
   projectName,
   initialPrompt,
   isNew = false,
+  selectedModel = 'auto',
   onClose,
   onPlanReady,
   onBuildStart,
@@ -33,6 +37,8 @@ export function AIAssistantPanel({
   const [userInput, setUserInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [currentModel, setCurrentModel] = useState<AIProvider>(selectedModel);
+  const [showModelSelector, setShowModelSelector] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -50,14 +56,15 @@ export function AIAssistantPanel({
     async function init() {
       try {
         // Try to load existing context
-        let existingContext = await projectOnboardingService.loadContext(projectId);
+        let existingContext = await aiOnboardingService.loadContext(projectId);
 
         if (!existingContext && isNew) {
           // Initialize new conversation for new projects
-          existingContext = await projectOnboardingService.initiateProject(
+          existingContext = await aiOnboardingService.initiateProject(
             projectId,
             projectName,
-            initialPrompt
+            initialPrompt,
+            currentModel
           );
         }
 
@@ -71,7 +78,7 @@ export function AIAssistantPanel({
     }
 
     init();
-  }, [projectId, projectName, initialPrompt, isNew]);
+  }, [projectId, projectName, initialPrompt, isNew, currentModel]);
 
   // Handle sending message
   const handleSend = async () => {
@@ -83,21 +90,24 @@ export function AIAssistantPanel({
     setIsTyping(true);
 
     try {
-      // Simulate AI thinking time
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const response = await projectOnboardingService.continueConversation(message, context);
+      const response = await aiOnboardingService.continueConversation(message, context, currentModel);
 
       setIsTyping(false);
 
       // Update context with new messages
-      const updatedContext = await projectOnboardingService.loadContext(projectId);
+      const updatedContext = await aiOnboardingService.loadContext(projectId);
       if (updatedContext) {
         setContext(updatedContext);
 
         // Check if plan is ready
         if (response.planReady && response.plan) {
           onPlanReady?.(response.plan);
+        } else if (response.stage === 'CONFIRMING_PLAN' && !response.plan && context.requirements) {
+          // Generate plan if we're at confirmation stage
+          const plan = await aiOnboardingService.generatePlan(context);
+          if (plan) {
+            onPlanReady?.(plan);
+          }
         }
 
         // Check if building started
@@ -105,9 +115,9 @@ export function AIAssistantPanel({
           onBuildStart?.();
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send message:', error);
-      toast.error('Failed to process message');
+      toast.error(error.message || 'Failed to process message. Check your API keys.');
       setIsTyping(false);
     } finally {
       setIsProcessing(false);
@@ -167,14 +177,56 @@ export function AIAssistantPanel({
             </p>
           </div>
         </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          </button>
-        )}
+        
+        <div className="flex items-center gap-2">
+          {/* Model Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowModelSelector(!showModelSelector)}
+              className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Cpu className="w-3.5 h-3.5" />
+              {currentModel === 'auto' ? 'Auto' : currentModel === 'claude' ? 'Claude' : currentModel === 'openai' ? 'GPT-4' : 'Gemini'}
+            </button>
+            
+            {showModelSelector && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50"
+              >
+                {(['auto', 'claude', 'openai', 'gemini'] as AIProvider[]).map((model) => (
+                  <button
+                    key={model}
+                    onClick={() => {
+                      setCurrentModel(model);
+                      aiOnboardingService.setModel(model);
+                      setShowModelSelector(false);
+                      toast.success(`Switched to ${model === 'auto' ? 'Auto Select' : model}`);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                      currentModel === model ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : ''
+                    }`}
+                  >
+                    {model === 'auto' && '🤖 Auto Select'}
+                    {model === 'claude' && '🧠 Claude Sonnet'}
+                    {model === 'openai' && '💬 GPT-4 Turbo'}
+                    {model === 'gemini' && '💎 Gemini Pro'}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </div>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}

@@ -8,7 +8,8 @@ import { AIAssistantPanel } from '@/components/builder/AIAssistantPanel';
 import { EmptyState } from '@/components/builder/EmptyState';
 import { PlanSummaryCard } from '@/components/builder/PlanSummaryCard';
 import { BuildProgress } from '@/components/builder/BuildProgress';
-import { projectOnboardingService } from '@/services/project-onboarding';
+import { aiOnboardingService } from '@/services/ai-onboarding-service';
+import type { AIProvider } from '@/lib/ai/model-router';
 import type { ProjectPlan } from '@/types/onboarding';
 import toast from 'react-hot-toast';
 import { Sparkles } from 'lucide-react';
@@ -30,6 +31,7 @@ export default function BuilderPage() {
   const [isBuilding, setIsBuilding] = useState(false);
   const [buildProgress, setBuildProgress] = useState(0);
   const [currentBuildStep, setCurrentBuildStep] = useState('');
+  const [selectedModel, setSelectedModel] = useState<AIProvider>('auto');
 
   // Load project data
   const loadProject = useCallback(async () => {
@@ -184,10 +186,11 @@ export default function BuilderPage() {
     
     // Initialize conversation with the prompt
     try {
-      await projectOnboardingService.initiateProject(
+      await aiOnboardingService.initiateProject(
         projectId,
         project.name,
-        prompt
+        prompt,
+        selectedModel
       );
     } catch (error) {
       console.error('Failed to start conversation:', error);
@@ -218,9 +221,9 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 relative">
+    <div className="h-screen flex flex-col bg-gray-50 relative overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -257,7 +260,7 @@ export default function BuilderPage() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-y-auto relative">
         {isNewProject ? (
           <EmptyState onPromptSelect={handlePromptSelect} />
         ) : (
@@ -292,6 +295,7 @@ export default function BuilderPage() {
               projectName={project.name}
               initialPrompt={project.ai_prompt || project.description || ''}
               isNew={isNewProject}
+              selectedModel={selectedModel}
               onClose={() => setShowAIPanel(false)}
               onPlanReady={handlePlanReady}
               onBuildStart={() => {}}
