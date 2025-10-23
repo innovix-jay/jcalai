@@ -19,13 +19,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface BuilderCanvasProps {
   projectId: string;
+  isBuilding?: boolean;
+  buildProgress?: number;
 }
 
-export function BuilderCanvas({ projectId }: BuilderCanvasProps) {
+export function BuilderCanvas({ projectId, isBuilding: propIsBuilding, buildProgress: propBuildProgress }: BuilderCanvasProps) {
   const { user } = useAuth();
   const { projects } = useProjectSync(user?.id || '');
-  const [isBuilding, setIsBuilding] = useState(false);
-  const [buildProgress, setBuildProgress] = useState(0);
+  const [isBuilding, setIsBuilding] = useState(propIsBuilding || false);
+  const [buildProgress, setBuildProgress] = useState(propBuildProgress || 0);
 
   const currentProject = projects.find(p => p.id === projectId);
 
