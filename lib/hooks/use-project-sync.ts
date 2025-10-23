@@ -12,6 +12,7 @@ export interface Project {
   last_built_at?: string;
   created_at: string;
   updated_at: string;
+  ai_metadata?: any;
 }
 
 export function useProjectSync(userId: string) {
@@ -109,7 +110,7 @@ export function useBuildProgress(projectId: string) {
     } finally {
       setLoading(false);
     }
-  }, [projectId, supabase]);
+  }, [projectId, supabase, fetchBuildLogs]);
 
   const fetchBuildLogs = useCallback(async () => {
     try {
