@@ -90,6 +90,22 @@ export function useBuildProgress(projectId: string) {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  const fetchBuildLogs = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('build_logs')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+
+      if (!error && data) {
+        setBuildLogs(data);
+      }
+    } catch (err) {
+      console.error('Error fetching build logs:', err);
+    }
+  }, [projectId, supabase]);
+
   const fetchBuildSession = useCallback(async () => {
     try {
       const { data, error } = await supabase
@@ -111,22 +127,6 @@ export function useBuildProgress(projectId: string) {
       setLoading(false);
     }
   }, [projectId, supabase, fetchBuildLogs]);
-
-  const fetchBuildLogs = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('build_logs')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: true });
-
-      if (!error && data) {
-        setBuildLogs(data);
-      }
-    } catch (err) {
-      console.error('Error fetching build logs:', err);
-    }
-  }, [projectId, supabase]);
 
   useEffect(() => {
     if (!projectId) return;
