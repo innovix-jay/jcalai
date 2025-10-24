@@ -9,7 +9,6 @@ import { BuilderPane } from '@/components/builder/BuilderPane';
 import { LivePreviewPane } from '@/components/builder/LivePreviewPane';
 import { ComponentLibrary } from '@/components/builder/ComponentLibrary';
 import { VersionHistory } from '@/components/builder/VersionHistory';
-import { VoiceController } from '@/components/builder/VoiceController';
 import type { AIProvider } from '@/lib/ai/model-router';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Play, StopCircle, Package, History, Download, ExternalLink, MoreHorizontal } from 'lucide-react';
@@ -279,9 +278,6 @@ export default function BuilderPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Voice Controller */}
-      <VoiceController projectId={projectId} />
     </div>
   );
 }
