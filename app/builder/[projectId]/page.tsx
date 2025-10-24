@@ -19,6 +19,7 @@ import { NaturalLanguageInput } from '@/components/builder/NaturalLanguageInput'
 import { DeployButton } from '@/components/builder/DeployButton';
 import { ComponentLibrary } from '@/components/builder/ComponentLibrary';
 import { VersionHistory } from '@/components/builder/VersionHistory';
+import { VoiceController } from '@/components/builder/VoiceController';
 import { aiOnboardingService } from '@/services/ai-onboarding-service';
 import type { AIProvider } from '@/lib/ai/model-router';
 import type { ProjectPlan } from '@/types/onboarding';
@@ -332,6 +333,9 @@ export default function BuilderPage() {
             />
           )}
         </AnimatePresence>
+
+        {/* Voice Controller - Fixed Position */}
+        <VoiceController projectId={projectId} />
       </div>
     </div>
   );
