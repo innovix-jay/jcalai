@@ -11,11 +11,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { projectId, component } = await req.json();
+    const { projectId, name, type, code, props } = await req.json();
 
-    if (!projectId || !component || !component.name || !component.code) {
+    if (!projectId || !name || !type || !code) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: projectId, name, type, code' },
         { status: 400 }
       );
     }
@@ -35,16 +35,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Store component in components table
+    // Store component in components table with correct schema
     const { data: newComponent, error: componentError } = await supabase
       .from('components')
       .insert({
         project_id: projectId,
-        name: component.name,
-        category: component.category || 'Other',
-        code: component.code,
-        props: component.props || {},
-        created_at: new Date().toISOString()
+        name: name,
+        type: type,
+        code: code,
+        props: props || {},
       })
       .select()
       .single();
@@ -60,6 +59,14 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Log activity
+    await supabase.from('project_activity').insert({
+      project_id: projectId,
+      action_type: 'component_added',
+      description: `Added component: ${name}`,
+      metadata: { component_id: newComponent.id, type }
+    });
 
     return NextResponse.json({ success: true, component: newComponent });
   } catch (error: any) {

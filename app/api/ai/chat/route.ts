@@ -1,52 +1,161 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AIModelRouter } from '@/lib/ai/model-router';
-
-const modelRouter = new AIModelRouter();
+import { createClient } from '@/lib/supabase/server';
+import { modelRouter } from '@/lib/ai/model-router';
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, conversationHistory } = await req.json();
+    const supabase = await createClient();
+    
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!message) {
+    const { 
+      message, 
+      mode = 'chat', 
+      projectId, 
+      conversationHistory = [],
+      provider = 'auto'
+    } = await req.json();
+
+    if (!message || !projectId) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: message, projectId' },
         { status: 400 }
       );
     }
 
+    // Verify project ownership
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select('id, name')
+      .eq('id', projectId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (projectError || !project) {
+      return NextResponse.json(
+        { error: 'Project not found or access denied' },
+        { status: 404 }
+      );
+    }
+
     // Build conversation context
-    const contextMessages = conversationHistory?.map((msg: any) => 
-      `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
-    ).join('\n\n') || '';
+    const messages = conversationHistory
+      .slice(-10) // Keep last 10 messages for context
+      .map((msg: any) => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }));
 
-    // Create prompt for conversational AI
-    const prompt = `You are a helpful AI assistant for a no-code app builder platform called JCAL.ai. 
-You are currently in CHAT mode - which means you should answer questions, provide advice, and have conversations, 
-but you should NOT execute any builds or make changes to the user's project.
+    messages.push({
+      role: 'user',
+      content: message
+    });
 
-If the user asks you to build something, politely remind them to switch to "Agent Mode" where you can actually 
-execute builds.
+    let systemPrompt = '';
 
-${contextMessages ? `\nConversation history:\n${contextMessages}\n` : ''}
+    if (mode === 'agent') {
+      // AGENT MODE: Build things
+      systemPrompt = `You are an AI builder assistant for JCAL.ai. When users ask you to build something, respond in a friendly way explaining what you'll create, then provide actions.
 
-User's message: ${message}
+Format your response like this:
 
-Respond in a friendly, helpful manner. Use markdown formatting for better readability. Be concise but informative.`;
+[Friendly explanation in plain English using markdown]
 
-    // Call AI model
-    const aiResult = await modelRouter.generate(prompt, 'general', 'gemini');
+\`\`\`json
+[
+  {"type": "create_page", "data": {"name": "PageName", "path": "/page", "template": "blank"}},
+  {"type": "add_component", "data": {"name": "Button", "type": "button", "code": "<button>Click</button>", "props": {}}}
+]
+\`\`\`
+
+Available actions:
+- create_page: Creates a new page with data: {name, path, template}
+- add_component: Adds a UI component with data: {name, type, code, props}
+- create_table: Creates a database table with data: {name, fields: [{name, type}]}
+
+Be conversational and helpful. Always explain what you're doing in plain English first.`;
+    } else {
+      // CHAT MODE: Just conversation
+      systemPrompt = 'You are a helpful AI assistant. Answer questions, help brainstorm ideas, and provide guidance. You are NOT building anything right now, just having a conversation.';
+    }
+
+    // Use the existing LLM provider system
+    const fullPrompt = `${systemPrompt}\n\nUser message: ${message}`;
+    
+    const llmResult = await modelRouter.generate(
+      fullPrompt, 
+      mode === 'agent' ? 'code' : 'general', 
+      provider as any
+    );
+
+    const content = llmResult.response;
+
+    // Extract actions from code blocks (only in agent mode)
+    let actions = [];
+    if (mode === 'agent') {
+      const actionsMatch = content.match(/```json\n([\s\S]*?)\n```/);
+      if (actionsMatch) {
+        try {
+          actions = JSON.parse(actionsMatch[1]);
+        } catch (e) {
+          console.error('Failed to parse actions:', e);
+        }
+      }
+    }
+
+    // Save messages to database
+    await supabase.from('chat_messages').insert([
+      {
+        project_id: projectId,
+        role: 'user',
+        content: message,
+        mode: mode
+      },
+      {
+        project_id: projectId,
+        role: 'assistant',
+        content: content,
+        mode: mode,
+        actions: actions,
+        metadata: {
+          provider: llmResult.provider,
+          model: llmResult.model,
+          tokens_used: llmResult.tokensUsed,
+          cost: llmResult.cost
+        }
+      }
+    ]);
+
+    // Log AI generation for tracking
+    await supabase.from('ai_generations').insert({
+      project_id: projectId,
+      provider: llmResult.provider,
+      model: llmResult.model,
+      prompt_tokens: Math.floor(llmResult.tokensUsed * 0.7), // Estimate
+      completion_tokens: Math.floor(llmResult.tokensUsed * 0.3), // Estimate
+      total_tokens: llmResult.tokensUsed,
+      cost_usd: llmResult.cost
+    });
 
     return NextResponse.json({
-      response: aiResult.response.trim()
+      response: content,
+      actions: actions,
+      provider: llmResult.provider,
+      model: llmResult.model,
+      tokensUsed: llmResult.tokensUsed,
+      cost: llmResult.cost
     });
 
   } catch (error: any) {
-    console.error('Error in AI chat:', error);
+    console.error('AI Chat Error:', error);
     return NextResponse.json(
       { 
-        error: 'Internal server error',
-        details: error?.message || 'Unknown error',
-        response: "I apologize, but I'm having trouble responding right now. Please try again."
+        error: 'Failed to process request', 
+        details: error.message 
       },
       { status: 500 }
     );

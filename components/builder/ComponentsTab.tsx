@@ -252,11 +252,10 @@ export function ComponentsTab({ projectId }: ComponentsTabProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectId,
-          component: {
-            name: componentName,
-            category: componentData.category,
-            code: componentData.code
-          }
+          name: componentName,
+          type: componentData.category.toLowerCase().replace(' ', '-'),
+          code: componentData.code,
+          props: {}
         })
       });
 

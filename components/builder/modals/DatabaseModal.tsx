@@ -83,7 +83,8 @@ export function DatabaseModal({ projectId, onClose }: DatabaseModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectId,
-          table: newTable
+          name: newTable.name,
+          fields: newTable.fields
         })
       });
 

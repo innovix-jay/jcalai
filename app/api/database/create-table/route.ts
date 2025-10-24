@@ -11,11 +11,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { projectId, table } = await req.json();
+    const { projectId, name, fields } = await req.json();
 
-    if (!projectId || !table || !table.name || !table.fields) {
+    if (!projectId || !name || !fields) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: projectId, name, fields' },
         { status: 400 }
       );
     }
@@ -35,14 +35,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Store table schema in database_schemas table
+    // Store table schema in database_schemas table with correct schema
     const { data: schema, error: schemaError } = await supabase
       .from('database_schemas')
       .insert({
         project_id: projectId,
-        table_name: table.name,
-        schema: table.fields,
-        created_at: new Date().toISOString()
+        table_name: name,
+        schema: {
+          fields: fields,
+          created_at: new Date().toISOString()
+        }
       })
       .select()
       .single();
@@ -58,6 +60,14 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Log activity
+    await supabase.from('project_activity').insert({
+      project_id: projectId,
+      action_type: 'table_created',
+      description: `Created table: ${name}`,
+      metadata: { schema_id: schema.id, field_count: fields.length }
+    });
 
     return NextResponse.json({ success: true, schema });
   } catch (error: any) {
