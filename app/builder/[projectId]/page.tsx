@@ -253,6 +253,8 @@ export default function BuilderPage() {
               <LivePreviewPane 
                 projectId={projectId}
                 url={previewUrl}
+                buildStatus={isBuilding ? 'building' : 'idle'}
+                buildProgress={buildProgress}
               />
             </Allotment.Pane>
           )}
