@@ -8,7 +8,7 @@ export default function DocsPage() {
       title: 'Getting Started',
       icon: Rocket,
       docs: [
-        { name: 'Quick Start Guide', desc: 'Get up and running in 5 minutes', href: '#quick-start' },
+        { name: 'Quick Start Guide', desc: 'Get up and running in 5 minutes', href: '/docs/quick-start' },
         { name: 'Your First App', desc: 'Create your first application with AI', href: '#first-app' },
         { name: 'Platform Overview', desc: 'Understand the JCAL.ai platform', href: '#overview' },
       ],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { BuilderWorkspace } from '@/components/builder/workspace';
@@ -22,9 +22,9 @@ export default function BuilderPage() {
 
   useEffect(() => {
     loadProject();
-  }, [projectId]);
+  }, [loadProject]);
 
-  const loadProject = async () => {
+  const loadProject = useCallback(async () => {
     const supabase = createClient();
     
     try {
@@ -55,7 +55,7 @@ export default function BuilderPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
   if (loading) {
     return (
