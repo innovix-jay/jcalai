@@ -271,7 +271,7 @@ Create a detailed implementation plan with specific tasks. Return JSON:
 
     // Step 3: Execute tasks in parallel
     const results = await Promise.all(
-      assignments.map(async (assignment) => {
+      assignments.map(async (assignment: any) => {
         const result = await this.execute(
           `You are a ${assignment.agent}. Complete this task:
 
