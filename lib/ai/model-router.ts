@@ -3,7 +3,7 @@
  * Automatically selects the best model based on prompt complexity and task type
  */
 
-export type AIProvider = 'claude' | 'openai' | 'gemini' | 'auto';
+export type AIProvider = 'claude' | 'openai' | 'gemini' | 'gemini-pro' | 'auto';
 export type TaskType = 'scaffold' | 'component' | 'page' | 'api' | 'database' | 'code' | 'general';
 
 export interface ModelCapabilities {
@@ -48,48 +48,63 @@ export class AIModelRouter {
   }
 
   private initializeModels() {
-    // Claude configuration
+    // Claude Sonnet 4.5 (latest and most capable, Oct 2025)
     this.models.set('claude', {
       provider: 'claude',
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       capabilities: {
         contextWindow: 200000,
         costPerToken: 0.003 / 1000, // $3 per million tokens
         strengthAreas: ['code_generation', 'complex_reasoning', 'long_context', 'architecture'],
-        weaknessAreas: ['image_generation'],
+        weaknessAreas: [],
         speed: 'medium',
         quality: 'high',
       },
     });
 
-    // OpenAI configuration
+    // OpenAI GPT-4o (latest flagship model, available with this API key)
     this.models.set('openai', {
       provider: 'openai',
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o',
       apiKey: process.env.OPENAI_API_KEY || '',
       capabilities: {
         contextWindow: 128000,
-        costPerToken: 0.01 / 1000, // $10 per million tokens
-        strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses'],
+        costPerToken: 0.0025 / 1000, // $2.50 per million input tokens
+        strengthAreas: ['general_purpose', 'creativity', 'multimodal', 'fast_responses', 'reasoning'],
         weaknessAreas: ['very_long_context'],
         speed: 'fast',
         quality: 'high',
       },
     });
 
-    // Gemini configuration
+    // Gemini 2.5 Flash (lightweight high-speed generation - default for manual selection)
     this.models.set('gemini', {
       provider: 'gemini',
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.5-flash', // Stable version (June 2025)
       apiKey: process.env.GOOGLE_API_KEY || '',
       capabilities: {
         contextWindow: 1000000,
-        costPerToken: 0.00125 / 1000, // $1.25 per million tokens (very cost-effective)
-        strengthAreas: ['massive_context', 'cost_effective', 'multimodal', 'data_analysis'],
-        weaknessAreas: ['complex_code_generation'],
+        costPerToken: 0.00075 / 1000, // $0.75 per million tokens (most cost-effective)
+        strengthAreas: ['massive_context', 'cost_effective', 'multimodal', 'speed'],
+        weaknessAreas: [],
+        speed: 'fast',
+        quality: 'high',
+      },
+    });
+
+    // Gemini 2.5 Pro (more capable than Flash)
+    this.models.set('gemini-pro', {
+      provider: 'gemini-pro',
+      model: 'gemini-2.5-pro', // Stable version (June 2025)
+      apiKey: process.env.GOOGLE_API_KEY || '',
+      capabilities: {
+        contextWindow: 1000000,
+        costPerToken: 0.00125 / 1000, // $1.25 per million tokens
+        strengthAreas: ['reasoning', 'code_generation', 'STEM', 'document_analysis', 'massive_context'],
+        weaknessAreas: [],
         speed: 'medium',
-        quality: 'medium',
+        quality: 'high',
       },
     });
   }
@@ -156,20 +171,20 @@ export class AIModelRouter {
       // Creative UI components - OpenAI for better design creativity
       selectedProvider = 'openai';
     } else if (analysis.estimatedTokens > 50000) {
-      // Very large context - use Gemini for cost-effectiveness
-      selectedProvider = 'gemini';
+      // Very large context - use Gemini 2.5 Pro for reasoning + context
+      selectedProvider = 'gemini-pro';
     } else if (analysis.complexity === 'high' && analysis.requiresCodeGeneration) {
-      // Complex code generation - Claude excels here
-      selectedProvider = 'claude';
+      // Complex code generation - use Gemini 2.5 Pro for reasoning
+      selectedProvider = 'gemini-pro';
     } else if (analysis.complexity === 'low' || taskType === 'general') {
-      // Simple tasks - use Gemini for cost-effectiveness
+      // Simple tasks - use Gemini Flash for speed and cost
       selectedProvider = 'gemini';
     } else if (taskType === 'api' || taskType === 'code') {
       // Backend logic and API - Claude for robust code
       selectedProvider = 'claude';
     } else {
-      // Default to OpenAI for balanced performance
-      selectedProvider = 'openai';
+      // Default to Gemini Flash for balanced performance and cost
+      selectedProvider = 'gemini';
     }
 
     const config = this.models.get(selectedProvider)!;
@@ -246,20 +261,34 @@ export class AIModelRouter {
     const selection = this.selectModel(prompt, taskType, userPreference);
     const config = this.models.get(selection.provider)!;
 
+    console.log('[Model Router] Selected provider:', selection.provider, 'Model:', selection.model);
+    console.log('[Model Router] Reasoning:', selection.reasoning);
+
     if (!config.apiKey) {
+      console.error('[Model Router] API key missing for:', selection.provider);
       throw new Error(`API key not configured for ${selection.provider}`);
     }
 
-    // Generate using the selected provider
-    const result = await this.generateWithProvider(selection.provider, config, prompt);
+    console.log('[Model Router] API key present for', selection.provider, '- length:', config.apiKey.length);
 
-    return {
-      response: result.response,
-      provider: selection.provider,
-      model: selection.model,
-      tokensUsed: result.tokensUsed,
-      cost: result.tokensUsed * config.capabilities.costPerToken,
-    };
+    try {
+      // Generate using the selected provider
+      const result = await this.generateWithProvider(selection.provider, config, prompt);
+
+      console.log('[Model Router] Generation successful! Tokens used:', result.tokensUsed);
+
+      return {
+        response: result.response,
+        provider: selection.provider,
+        model: selection.model,
+        tokensUsed: result.tokensUsed,
+        cost: result.tokensUsed * config.capabilities.costPerToken,
+      };
+    } catch (error: any) {
+      console.error('[Model Router] Generation error:', error);
+      console.error('[Model Router] Error message:', error.message);
+      throw error;
+    }
   }
 
   private async generateWithProvider(
@@ -273,6 +302,7 @@ export class AIModelRouter {
       case 'openai':
         return this.generateWithOpenAI(config, prompt);
       case 'gemini':
+      case 'gemini-pro':
         return this.generateWithGemini(config, prompt);
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -340,6 +370,10 @@ export class AIModelRouter {
     config: AIModelConfig,
     prompt: string
   ): Promise<{ response: string; tokensUsed: number }> {
+    console.log('[Gemini] Calling API with model:', config.model);
+    console.log('[Gemini] API Key length:', config.apiKey?.length || 0);
+    
+    // Use v1beta for Gemini models (v1 doesn't support these yet)
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`,
       {
@@ -348,16 +382,26 @@ export class AIModelRouter {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          }
         }),
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('[Gemini] API error response:', errorText);
+      throw new Error(`Gemini API error (${response.status}): ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('[Gemini] API response received');
+    
     const text = data.candidates[0].content.parts[0].text;
     
     // Gemini doesn't return token counts in the same way, estimate

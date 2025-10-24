@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { JCALLogo } from '@/components/ui/jcal-logo';
 import { Sparkles, ArrowRight, Code, Database, Rocket } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
 export default function CreateAppPage() {
@@ -22,19 +23,71 @@ export default function CreateAppPage() {
       return;
     }
 
+    if (!user) {
+      toast.error('Please log in to create an app');
+      router.push('/auth/login');
+      return;
+    }
+
     setLoading(true);
+    const supabase = createClient();
+    
     try {
-      // TODO: Implement actual app creation logic
-      // For now, simulate creation and redirect to builder
+      // Create the project in the database
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .insert([
+          {
+            name: prompt.substring(0, 50) + (prompt.length > 50 ? '...' : ''),
+            description: prompt,
+            user_id: user.id,
+            status: 'draft',
+            app_type: 'web',
+            ai_prompt: prompt,
+            config: {
+              framework: 'nextjs',
+              styling: 'tailwindcss',
+              database: 'supabase',
+              auth: true,
+              api: true
+            }
+          }
+        ])
+        .select()
+        .single();
+
+      if (projectError) throw projectError;
+
+      // Create a default home page for the project
+      const { error: pageError } = await supabase
+        .from('pages')
+        .insert([
+          {
+            project_id: project.id,
+            name: 'Home',
+            title: 'Home',
+            slug: 'home',
+            path: '/',
+            is_home: true,
+            order_index: 0,
+            structure: {
+              ROOT: {
+                type: 'Container',
+                nodes: [],
+                props: {}
+              }
+            }
+          }
+        ]);
+
+      if (pageError) throw pageError;
+
       toast.success('App created! Redirecting to builder...');
       
-      // Generate a mock project ID
-      const projectId = `project_${Date.now()}`;
-      
       // Redirect to builder with the new project
-      router.push(`/builder/${projectId}`);
-    } catch (error) {
-      toast.error('Failed to create app. Please try again.');
+      router.push(`/builder/${project.id}`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create app. Please try again.');
       console.error('App creation error:', error);
     } finally {
       setLoading(false);
