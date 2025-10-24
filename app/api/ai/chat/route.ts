@@ -1,44 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MultiAIOrchestrator } from '@/services/multi-ai-orchestrator';
+import { AIModelRouter } from '@/lib/ai/model-router';
 
-const orchestrator = new MultiAIOrchestrator();
+const modelRouter = new AIModelRouter();
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, history } = await req.json();
+    const { message, conversationHistory } = await req.json();
 
     if (!message) {
-      return NextResponse.json({ error: 'Message required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
-    // Use the Multi-AI Orchestrator to generate response
-    const result = await orchestrator.execute(
-      message,
-      'architecture', // Default task type for general chat
-      {
-        provider: 'auto', // Let AI auto-select best model
-        systemPrompt: `You are JCAL.ai's helpful AI assistant. You help users:
-- Create and manage AI agents
-- Build web applications
-- Understand JCAL.ai features
-- Navigate the platform
+    // Build conversation context
+    const contextMessages = conversationHistory?.map((msg: any) => 
+      `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+    ).join('\n\n') || '';
 
-Be friendly, helpful, and concise. Always provide actionable suggestions.`,
-        temperature: 0.7
-      }
-    );
+    // Create prompt for conversational AI
+    const prompt = `You are a helpful AI assistant for a no-code app builder platform called JCAL.ai. 
+You are currently in CHAT mode - which means you should answer questions, provide advice, and have conversations, 
+but you should NOT execute any builds or make changes to the user's project.
+
+If the user asks you to build something, politely remind them to switch to "Agent Mode" where you can actually 
+execute builds.
+
+${contextMessages ? `\nConversation history:\n${contextMessages}\n` : ''}
+
+User's message: ${message}
+
+Respond in a friendly, helpful manner. Use markdown formatting for better readability. Be concise but informative.`;
+
+    // Call AI model
+    const aiResponse = await modelRouter.generate(prompt, {
+      model: 'gemini', // Use Gemini for general chat (faster, cheaper)
+      maxTokens: 1000
+    });
 
     return NextResponse.json({
-      message: result.response,
-      model: result.model,
-      timestamp: new Date().toISOString()
+      response: aiResponse.trim()
     });
-  } catch (error) {
-    console.error('AI chat error:', error);
+
+  } catch (error: any) {
+    console.error('Error in AI chat:', error);
     return NextResponse.json(
-      { error: 'Failed to process message' },
+      { 
+        error: 'Internal server error',
+        details: error?.message || 'Unknown error',
+        response: "I apologize, but I'm having trouble responding right now. Please try again."
+      },
       { status: 500 }
     );
   }
 }
-
