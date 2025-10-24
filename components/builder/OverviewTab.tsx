@@ -13,6 +13,8 @@ import {
 import toast from 'react-hot-toast';
 import { AddPageModal } from './modals/AddPageModal';
 import { PlaceholderModal } from './modals/PlaceholderModal';
+import { DatabaseModal } from './modals/DatabaseModal';
+import { SettingsModal } from './modals/SettingsModal';
 
 interface OverviewTabProps {
   project: any;
@@ -302,17 +304,19 @@ export function OverviewTab({
           />
         )}
         {showDatabaseModal && (
-          <PlaceholderModal
-            title="Database Setup"
-            description="Configure your data models"
+          <DatabaseModal
+            projectId={project?.id}
             onClose={() => setShowDatabaseModal(false)}
           />
         )}
         {showSettingsModal && (
-          <PlaceholderModal
-            title="Project Settings"
-            description="Configure project options"
+          <SettingsModal
+            projectId={project?.id}
+            project={project}
             onClose={() => setShowSettingsModal(false)}
+            onUpdate={(updates) => {
+              onProjectUpdate(updates);
+            }}
           />
         )}
       </AnimatePresence>
