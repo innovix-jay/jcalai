@@ -3,8 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+interface OptimizationSuggestion {
+  id: string;
+  autoFixable: boolean;
+}
+
 export function OptimizationPanel({ projectId }: { projectId: string }) {
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
 
