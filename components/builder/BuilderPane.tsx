@@ -51,8 +51,7 @@ export function BuilderPane({
         {activeTab === 'chat' && (
           <ChatTab
             projectId={projectId}
-            project={project}
-            onBuildTriggered={(hasActivity) => setChatHasActivity(hasActivity)}
+            onBuildTriggered={() => setChatHasActivity(true)}
           />
         )}
 
