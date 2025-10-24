@@ -6,6 +6,11 @@ import { motion } from 'framer-motion';
 interface OptimizationSuggestion {
   id: string;
   autoFixable: boolean;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  type: string;
+  title: string;
+  description: string;
+  impact: string;
 }
 
 export function OptimizationPanel({ projectId }: { projectId: string }) {
@@ -88,8 +93,8 @@ export function OptimizationPanel({ projectId }: { projectId: string }) {
   );
 }
 
-function OptimizationCard({ suggestion }: any) {
-  const severityColors = {
+function OptimizationCard({ suggestion }: { suggestion: OptimizationSuggestion }) {
+  const severityColors: Record<string, string> = {
     critical: 'bg-red-100 text-red-800',
     high: 'bg-orange-100 text-orange-800',
     medium: 'bg-yellow-100 text-yellow-800',
