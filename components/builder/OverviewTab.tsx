@@ -57,7 +57,7 @@ export function OverviewTab({
       color: 'blue',
       onClick: () => {
         // TODO: Open Add Page Modal
-        toast.info('Add Page modal (coming soon)');
+        toast('Add Page modal (coming soon)', { icon: '📄' });
       }
     },
     {
@@ -68,7 +68,7 @@ export function OverviewTab({
       color: 'purple',
       onClick: () => {
         // TODO: Open Add Component Modal
-        toast.info('Add Component modal (coming soon)');
+        toast('Add Component modal (coming soon)', { icon: '🧩' });
       }
     },
     {
@@ -79,7 +79,7 @@ export function OverviewTab({
       color: 'green',
       onClick: () => {
         // TODO: Open Database Modal
-        toast.info('Database modal (coming soon)');
+        toast('Database modal (coming soon)', { icon: '💾' });
       }
     },
     {
@@ -90,7 +90,7 @@ export function OverviewTab({
       color: 'gray',
       onClick: () => {
         // TODO: Open Settings Modal
-        toast.info('Settings modal (coming soon)');
+        toast('Settings modal (coming soon)', { icon: '⚙️' });
       }
     }
   ];

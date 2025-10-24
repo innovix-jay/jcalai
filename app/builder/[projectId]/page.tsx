@@ -117,7 +117,7 @@ export default function BuilderPage() {
   const handleStopBuild = () => {
     setIsBuilding(false);
     setBuildProgress(0);
-    toast.info('Build stopped');
+    toast('Build stopped', { icon: 'ℹ️' });
   };
 
   if (loading) {
