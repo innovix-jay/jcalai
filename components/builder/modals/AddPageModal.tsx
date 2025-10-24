@@ -53,15 +53,20 @@ export function AddPageModal({ projectId, onClose, onPageAdded }: AddPageModalPr
         })
       });
 
-      if (!response.ok) throw new Error('Failed to create page');
+      const data = await response.json();
 
-      const newPage = await response.json();
+      if (!response.ok) {
+        const errorMsg = data.details || data.error || 'Failed to create page';
+        console.error('Page creation error:', data);
+        throw new Error(errorMsg);
+      }
+
       toast.success(`Page "${pageName}" created successfully!`);
-      onPageAdded?.(newPage);
+      onPageAdded?.(data.page);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating page:', error);
-      toast.error('Failed to create page. Please try again.');
+      toast.error(error.message || 'Failed to create page. Please try again.');
     } finally {
       setIsCreating(false);
     }

@@ -127,16 +127,24 @@ export async function POST(req: NextRequest) {
     if (createError) {
       console.error('Error creating page:', createError);
       return NextResponse.json(
-        { error: 'Failed to create page' },
+        { 
+          error: 'Failed to create page', 
+          details: createError.message,
+          code: createError.code 
+        },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(newPage);
-  } catch (error) {
+    return NextResponse.json({ success: true, page: newPage });
+  } catch (error: any) {
     console.error('Error in create page API:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: error?.message || 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     );
   }
