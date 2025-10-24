@@ -252,7 +252,7 @@ export default function BuilderPage() {
             <Allotment.Pane minSize={300}>
               <LivePreviewPane 
                 projectId={projectId}
-                previewUrl={previewUrl || undefined}
+                url={previewUrl}
               />
             </Allotment.Pane>
           )}
@@ -262,7 +262,10 @@ export default function BuilderPage() {
       {/* Modals */}
       <AnimatePresence>
         {showComponentLibrary && (
-          <ComponentLibrary onClose={() => setShowComponentLibrary(false)} />
+          <ComponentLibrary 
+            projectId={projectId}
+            onClose={() => setShowComponentLibrary(false)} 
+          />
         )}
       </AnimatePresence>
 
