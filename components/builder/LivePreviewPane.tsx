@@ -140,8 +140,20 @@ export function LivePreviewPane({
             {/* CTA Button */}
             <button 
               onClick={() => {
+                // Switch to AI Chat tab
                 const chatTab = document.querySelector('[data-tab="chat"]') as HTMLElement;
-                if (chatTab) chatTab.click();
+                if (chatTab) {
+                  chatTab.click();
+                  
+                  // Focus the chat input after a brief delay for tab transition
+                  setTimeout(() => {
+                    const chatInput = document.querySelector('[data-chat-input]') as HTMLTextAreaElement;
+                    if (chatInput) {
+                      chatInput.focus();
+                      chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                  }, 150);
+                }
               }}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3.5 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105"
             >

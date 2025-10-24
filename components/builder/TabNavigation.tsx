@@ -44,6 +44,7 @@ export function TabNavigation({ activeTab, onTabChange, chatHasActivity = false 
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
+            data-tab={tab.id}
             className={`
               relative flex items-center gap-2 px-6 py-3
               border-b-2 transition-all duration-200

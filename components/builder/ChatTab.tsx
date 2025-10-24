@@ -201,6 +201,7 @@ export function ChatTab({ projectId, project, onBuildTriggered }: ChatTabProps) 
             onKeyDown={handleKeyDown}
             placeholder="Describe what you want to build... (Shift+Enter for new line)"
             rows={2}
+            data-chat-input
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg resize-none
                      focus:ring-2 focus:ring-purple-500 focus:border-transparent
                      transition-all"
