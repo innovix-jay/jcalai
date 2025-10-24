@@ -20,10 +20,6 @@ export default function BuilderPage() {
   const [selectedModel, setSelectedModel] = useState<'auto' | 'claude' | 'openai' | 'gemini'>('auto');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProject();
-  }, [loadProject]);
-
   const loadProject = useCallback(async () => {
     const supabase = createClient();
     
@@ -56,6 +52,10 @@ export default function BuilderPage() {
       setLoading(false);
     }
   }, [projectId]);
+
+  useEffect(() => {
+    loadProject();
+  }, [loadProject]);
 
   if (loading) {
     return (
