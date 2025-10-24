@@ -53,7 +53,7 @@ export interface TechStackPlan {
 
 export interface ConversationMessage {
   id: string;
-  role: 'ai' | 'user';
+  role: 'ai' | 'user' | 'system' | 'error';
   content: string;
   timestamp: Date;
   metadata?: {

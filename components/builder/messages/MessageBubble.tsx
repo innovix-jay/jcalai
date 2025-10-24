@@ -14,6 +14,28 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, isLatest = false }: MessageBubbleProps) {
   const isAI = message.role === 'ai';
+  const isSystem = message.role === 'system';
+  const isError = message.role === 'error';
+
+  // Handle system and error messages differently
+  if (isSystem || isError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="flex justify-center mb-4"
+      >
+        <div className={`px-4 py-2 rounded-lg text-sm font-medium ${
+          isError 
+            ? 'bg-red-100 text-red-800 border border-red-200' 
+            : 'bg-blue-100 text-blue-800 border border-blue-200'
+        }`}>
+          {message.content}
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
