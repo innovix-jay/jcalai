@@ -73,7 +73,7 @@ Focus on:
           await this.applyFix(projectId, suggestion.fix!);
           return { id: suggestion.id, status: 'success' };
         } catch (error) {
-          return { id: suggestion.id, status: 'failed', error: error.message };
+          return { id: suggestion.id, status: 'failed', error: error instanceof Error ? error.message : 'Unknown error' };
         }
       })
     );
