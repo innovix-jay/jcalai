@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FilePlus, 
   Package, 
@@ -11,6 +11,8 @@ import {
   Check
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AddPageModal } from './modals/AddPageModal';
+import { PlaceholderModal } from './modals/PlaceholderModal';
 
 interface OverviewTabProps {
   project: any;
@@ -30,6 +32,10 @@ export function OverviewTab({
   const [description, setDescription] = useState(project?.description || '');
   const [status, setStatus] = useState(project?.status || 'planning');
   const [isSaving, setIsSaving] = useState(false);
+  const [showAddPageModal, setShowAddPageModal] = useState(false);
+  const [showComponentModal, setShowComponentModal] = useState(false);
+  const [showDatabaseModal, setShowDatabaseModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -56,8 +62,7 @@ export function OverviewTab({
       description: 'Create new page',
       color: 'blue',
       onClick: () => {
-        // TODO: Open Add Page Modal
-        toast('Add Page modal (coming soon)', { icon: '📄' });
+        setShowAddPageModal(true);
       }
     },
     {
@@ -67,8 +72,7 @@ export function OverviewTab({
       description: 'Insert UI element',
       color: 'purple',
       onClick: () => {
-        // TODO: Open Add Component Modal
-        toast('Add Component modal (coming soon)', { icon: '🧩' });
+        setShowComponentModal(true);
       }
     },
     {
@@ -78,8 +82,7 @@ export function OverviewTab({
       description: 'Setup data models',
       color: 'green',
       onClick: () => {
-        // TODO: Open Database Modal
-        toast('Database modal (coming soon)', { icon: '💾' });
+        setShowDatabaseModal(true);
       }
     },
     {
@@ -89,8 +92,7 @@ export function OverviewTab({
       description: 'Project config',
       color: 'gray',
       onClick: () => {
-        // TODO: Open Settings Modal
-        toast('Settings modal (coming soon)', { icon: '⚙️' });
+        setShowSettingsModal(true);
       }
     }
   ];
@@ -279,6 +281,41 @@ export function OverviewTab({
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {showAddPageModal && (
+          <AddPageModal
+            projectId={project?.id}
+            onClose={() => setShowAddPageModal(false)}
+            onPageAdded={(page) => {
+              // Optionally refresh project data or show success message
+              console.log('Page added:', page);
+            }}
+          />
+        )}
+        {showComponentModal && (
+          <PlaceholderModal
+            title="Add Component"
+            description="Insert a new UI component"
+            onClose={() => setShowComponentModal(false)}
+          />
+        )}
+        {showDatabaseModal && (
+          <PlaceholderModal
+            title="Database Setup"
+            description="Configure your data models"
+            onClose={() => setShowDatabaseModal(false)}
+          />
+        )}
+        {showSettingsModal && (
+          <PlaceholderModal
+            title="Project Settings"
+            description="Configure project options"
+            onClose={() => setShowSettingsModal(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
