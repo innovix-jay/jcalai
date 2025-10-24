@@ -151,6 +151,7 @@ useEffect(() => {
 | BuilderPane callback mismatch | `components/builder/BuilderPane.tsx` | TypeScript Error | ✅ Fixed |
 | ChatTab hook warning | `components/builder/ChatTab.tsx` | ESLint Warning | ✅ Fixed |
 | Message type/role mismatch | `components/builder/ChatTab.tsx` | TypeScript Error | ✅ Fixed |
+| ConversationMessage type | `types/onboarding.ts` | TypeScript Error | ✅ Fixed |
 
 ---
 
@@ -188,7 +189,36 @@ interface Message {
 - Error messages
 - ConversationHistory mapping (2 locations)
 
-**Commit**: `77053c0`
+**Commit**: `d17e36b`
+
+---
+
+### Issue #7: ConversationMessage Type Extension
+**File**: `types/onboarding.ts`  
+**Error**: `ConversationMessage` type only supported `'ai' | 'user'` roles, but `Message` interface included `'system' | 'error'` roles.
+
+**Root Cause**: Type mismatch between `ConversationMessage` and `Message` interfaces.
+
+**Fix Applied**:
+```typescript
+// ❌ BEFORE:
+export interface ConversationMessage {
+  role: 'ai' | 'user';
+}
+
+// ✅ AFTER:
+export interface ConversationMessage {
+  role: 'ai' | 'user' | 'system' | 'error';
+}
+```
+
+**Additional Changes**:
+- Updated `MessageBubble` component to handle system/error messages with proper styling
+- System messages: Blue background with blue text
+- Error messages: Red background with red text
+- Both centered in chat interface
+
+**Commit**: `d17e36b`
 
 ---
 
@@ -198,7 +228,7 @@ interface Message {
 2. **Second Attempt**: Failed - Settings API missing fields  
 3. **Third Attempt**: Failed - BuilderPane callback signature
 4. **Fourth Attempt**: Failed - Message type/role property mismatch
-5. **Fifth Attempt**: ⏳ In Progress (Current)
+5. **Fifth Attempt**: ✅ **SUCCESS** - TypeScript error fixed, deployment ready!
 
 ---
 
