@@ -34,13 +34,10 @@ User's message: ${message}
 Respond in a friendly, helpful manner. Use markdown formatting for better readability. Be concise but informative.`;
 
     // Call AI model
-    const aiResponse = await modelRouter.generate(prompt, {
-      model: 'gemini', // Use Gemini for general chat (faster, cheaper)
-      maxTokens: 1000
-    });
+    const aiResult = await modelRouter.generate(prompt, 'general', 'gemini');
 
     return NextResponse.json({
-      response: aiResponse.trim()
+      response: aiResult.response.trim()
     });
 
   } catch (error: any) {

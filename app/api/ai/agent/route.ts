@@ -109,13 +109,10 @@ Your friendly explanation here...
 `;
 
     // Call AI model
-    const aiResponse = await modelRouter.generate(prompt, {
-      model: 'claude', // Use Claude for code generation
-      maxTokens: 2000
-    });
+    const aiResult = await modelRouter.generate(prompt, 'code', 'claude');
 
     // Parse response
-    const parts = aiResponse.split('---ACTIONS---');
+    const parts = aiResult.response.split('---ACTIONS---');
     const plainTextResponse = parts[0].trim();
     
     let actions = [];
@@ -133,8 +130,8 @@ Your friendly explanation here...
       project_id: projectId,
       user_id: user.id,
       prompt: message,
-      response: aiResponse,
-      model_used: 'claude',
+      response: aiResult.response,
+      model_used: aiResult.provider,
       created_at: new Date().toISOString()
     });
 

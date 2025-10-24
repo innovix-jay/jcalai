@@ -85,7 +85,7 @@ Switch to **Agent mode** to have me build things for you!`
       };
       setMessages(updatedMessages);
     }
-  }, [mode]);
+  }, [mode, messages]);
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
