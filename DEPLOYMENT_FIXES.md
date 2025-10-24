@@ -150,6 +150,45 @@ useEffect(() => {
 | Settings API missing fields | `app/api/settings/update/route.ts` | TypeScript Error | ✅ Fixed |
 | BuilderPane callback mismatch | `components/builder/BuilderPane.tsx` | TypeScript Error | ✅ Fixed |
 | ChatTab hook warning | `components/builder/ChatTab.tsx` | ESLint Warning | ✅ Fixed |
+| Message type/role mismatch | `components/builder/ChatTab.tsx` | TypeScript Error | ✅ Fixed |
+
+---
+
+### Issue #6: Message Type Property Mismatch
+**File**: `components/builder/ChatTab.tsx`  
+**Error**:
+```
+Type error: Property 'role' is missing in type 'Message' but required in type 'ConversationMessage'.
+```
+
+**Root Cause**: The `Message` interface in `ChatTab.tsx` used `type` property, but `MessageBubble` component expects `ConversationMessage` with `role` property.
+
+**Fix Applied**:
+```typescript
+// ❌ BEFORE:
+interface Message {
+  type: 'user' | 'ai' | 'system' | 'error';
+}
+// Usage: message.type === 'user'
+
+// ✅ AFTER:
+interface Message {
+  role: 'user' | 'ai' | 'system' | 'error';
+}
+// Usage: message.role === 'user'
+```
+
+**All instances updated** (10 locations):
+- Message interface definition
+- Initial welcome message
+- User message creation
+- AI message creation (Agent mode)
+- AI message creation (Chat mode)
+- System messages (execution)
+- Error messages
+- ConversationHistory mapping (2 locations)
+
+**Commit**: `77053c0`
 
 ---
 
@@ -158,7 +197,8 @@ useEffect(() => {
 1. **First Attempt**: Failed - AI Agent API signature error
 2. **Second Attempt**: Failed - Settings API missing fields  
 3. **Third Attempt**: Failed - BuilderPane callback signature
-4. **Fourth Attempt**: ⏳ In Progress (Current)
+4. **Fourth Attempt**: Failed - Message type/role property mismatch
+5. **Fifth Attempt**: ⏳ In Progress (Current)
 
 ---
 
