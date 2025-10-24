@@ -12,7 +12,7 @@ import { BackendPanel } from '@/components/builder/backend-panel';
 
 export default function BuilderPage() {
   const params = useParams();
-  const projectId = params.projectId as string;
+  const projectId = params?.projectId as string;
   const [project, setProject] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'preview' | 'backend'>('preview');
