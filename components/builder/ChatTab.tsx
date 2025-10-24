@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Bot, User, Sparkles, MessageSquare } from 'lucide-react';
+import { Send, Loader2, Bot, User, Sparkles, MessageSquare, Mic, MicOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { MessageBubble } from './messages/MessageBubble';
 import { TypingIndicator } from './messages/TypingIndicator';
@@ -27,7 +27,9 @@ export function ChatTab({ projectId, onBuildTriggered }: ChatTabProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Initial welcome message
   useEffect(() => {
@@ -227,6 +229,59 @@ Switch to **Agent mode** to have me build things for you!`
     }
   };
 
+  // Voice input handlers
+  const startVoiceRecognition = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast.error('Voice recognition is not supported in your browser');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast('Listening... Speak now', { icon: '🎤', duration: 2000 });
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      toast.success('Voice input captured!');
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      
+      if (event.error === 'no-speech') {
+        toast.error('No speech detected. Please try again.');
+      } else if (event.error === 'not-allowed') {
+        toast.error('Microphone access denied. Please enable it in your browser settings.');
+      } else {
+        toast.error('Voice input failed. Please try again.');
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopVoiceRecognition = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header with Mode Toggle */}
@@ -304,6 +359,27 @@ Switch to **Agent mode** to have me build things for you!`
                      focus:ring-2 focus:ring-purple-500 focus:border-transparent
                      transition-all"
           />
+          
+          {/* Voice Input Button */}
+          <button
+            onClick={isListening ? stopVoiceRecognition : startVoiceRecognition}
+            disabled={isTyping}
+            className={`px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-2
+                     disabled:cursor-not-allowed ${
+                       isListening 
+                         ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                         : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                     }`}
+            title={isListening ? 'Stop listening' : 'Voice input'}
+          >
+            {isListening ? (
+              <MicOff className="w-5 h-5" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
+          </button>
+
+          {/* Send Button */}
           <button
             onClick={handleSend}
             disabled={!input.trim() || isTyping}
@@ -324,10 +400,15 @@ Switch to **Agent mode** to have me build things for you!`
             )}
           </button>
         </div>
-        <div className="mt-2 text-xs text-gray-500">
-          {mode === 'agent' 
-            ? "Be specific about what you want to build for best results"
-            : "I'm here to answer your questions and help brainstorm ideas"}
+        <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+          <span>
+            {mode === 'agent' 
+              ? "Be specific about what you want to build for best results"
+              : "I'm here to answer your questions and help brainstorm ideas"}
+          </span>
+          <span className="text-gray-400">
+            💡 Try voice input with the microphone button
+          </span>
         </div>
       </div>
     </div>
