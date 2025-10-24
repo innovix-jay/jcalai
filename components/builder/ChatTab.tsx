@@ -16,7 +16,7 @@ type AIMode = 'agent' | 'chat';
 
 interface Message {
   id: string;
-  type: 'user' | 'ai' | 'system' | 'error';
+  role: 'user' | 'ai' | 'system' | 'error';
   content: string;
   timestamp: Date;
   actions?: any[];
@@ -35,7 +35,7 @@ export function ChatTab({ projectId, onBuildTriggered }: ChatTabProps) {
   useEffect(() => {
     setMessages([{
       id: '1',
-      type: 'ai',
+      role: 'ai',
       content: `Hi! I'm your AI Builder Assistant powered by Multi-AI (Claude, GPT, Gemini).
 
 **Current Mode: Agent** (I'll build things for you)
@@ -92,7 +92,7 @@ Switch to **Agent mode** to have me build things for you!`
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'user',
+      role: 'user',
       content: input,
       timestamp: new Date()
     };
@@ -112,7 +112,7 @@ Switch to **Agent mode** to have me build things for you!`
             projectId,
             message: currentInput,
             conversationHistory: messages.slice(-5).map(m => ({
-              role: m.type === 'user' ? 'user' : 'assistant',
+              role: m.role === 'user' ? 'user' : 'assistant',
               content: m.content
             }))
           })
@@ -127,7 +127,7 @@ Switch to **Agent mode** to have me build things for you!`
         // AI response in plain English
         const aiMessage: Message = {
           id: Date.now().toString(),
-          type: 'ai',
+          role: 'ai',
           content: data.response,
           timestamp: new Date(),
           actions: data.actions
@@ -139,7 +139,7 @@ Switch to **Agent mode** to have me build things for you!`
         if (data.actions && data.actions.length > 0) {
           const executionMessage: Message = {
             id: Date.now().toString(),
-            type: 'system',
+            role: 'system',
             content: `🔨 Building ${data.actions.length} change${data.actions.length > 1 ? 's' : ''}...`,
             timestamp: new Date()
           };
@@ -163,7 +163,7 @@ Switch to **Agent mode** to have me build things for you!`
               ...withoutBuilding,
               {
                 id: Date.now().toString(),
-                type: 'system',
+                role: 'system',
                 content: `✅ Done! ${successCount} of ${data.actions.length} changes applied successfully. Your changes are now visible in the preview.`,
                 timestamp: new Date()
               }
@@ -185,7 +185,7 @@ Switch to **Agent mode** to have me build things for you!`
           body: JSON.stringify({
             message: currentInput,
             conversationHistory: messages.slice(-10).map(m => ({
-              role: m.type === 'user' ? 'user' : 'assistant',
+              role: m.role === 'user' ? 'user' : 'assistant',
               content: m.content
             }))
           })
@@ -199,7 +199,7 @@ Switch to **Agent mode** to have me build things for you!`
 
         const aiMessage: Message = {
           id: Date.now().toString(),
-          type: 'ai',
+          role: 'ai',
           content: data.response,
           timestamp: new Date()
         };
@@ -211,7 +211,7 @@ Switch to **Agent mode** to have me build things for you!`
       console.error('Chat error:', error);
       const errorMessage: Message = {
         id: Date.now().toString(),
-        type: 'error',
+        role: 'error',
         content: error.message || 'Sorry, something went wrong. Please try again.',
         timestamp: new Date()
       };
