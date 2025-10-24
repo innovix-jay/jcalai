@@ -16,10 +16,6 @@ export function BackendPanel({ project }: BackendPanelProps) {
   const [integrations, setIntegrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadBackendData();
-  }, [loadBackendData]);
-
   const loadBackendData = useCallback(async () => {
     const supabase = createClient();
     setLoading(true);
@@ -54,6 +50,10 @@ export function BackendPanel({ project }: BackendPanelProps) {
       setLoading(false);
     }
   }, [project]);
+
+  useEffect(() => {
+    loadBackendData();
+  }, [loadBackendData]);
 
   return (
     <div className="h-full flex flex-col bg-white">
